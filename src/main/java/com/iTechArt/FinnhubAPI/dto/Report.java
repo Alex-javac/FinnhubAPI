@@ -1,74 +1,16 @@
-package com.iTechArt.FinnhubAPI.model;
+package com.iTechArt.FinnhubAPI.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import java.util.List;
-
-@Getter
-@Setter
-@ToString
-@NoArgsConstructor
-@Entity
-@Table(name = "financial_statement")
-public class FinancialStatement extends BaseEntity {
-
-    @Column(name = "accessNumber")
-    private String accessNumber;
-
-    @Column(name = "symbol")
-    private String symbol;
-
-    @Column(name = "cik")
-    private String cik;
-
-    @Column(name = "year")
-    private String year;
-
-    @Column(name = "quarter")
-    private String quarter;
-
-    @Column(name = "form")
-    private String form;
-
-    @Column(name = "startDate")
-    private String startDate;
-
-    @Column(name = "endDate")
-    private String endDate;
-
-    @Column(name = "filedDate")
-    private String filedDate;
-
-    @Column(name = "acceptedDate")
-    private String acceptedDate;
-
-
-
-    @OneToMany(mappedBy = "financialStatement")
-    private List<Report> report;
+import lombok.*;
+@Data
+public class Report {
+    private String unit;
+    private String label;
+    private String value;
+    private String concept;
 }
-
-
 /**
- * {"accessNumber":"0001564590-21-004599",
- * "symbol":"TSLA",
- * "cik":"1318605",
- * "year":2020,
- * "quarter":0,
- * "form":"10-K",
- * "startDate":"2020-01-01 00:00:00",
- * "endDate":"2020-12-31 00:00:00",
- * "filedDate":"2021-02-08 00:00:00",
- * "acceptedDate":"2021-02-08 07:27:23",
  * "report":{
- *
+ * <p>
  * "bs":[
  * {"unit":"usd",
  * "label":"Cash and cash equivalents",

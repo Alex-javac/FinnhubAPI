@@ -34,11 +34,22 @@ public class User extends BaseEntity {
     @Column(name = "updated")
     private Date updated;
 
+    @ManyToOne
+    @JoinColumn(name = "subscription_id")
+    private Subscription subscription;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @Fetch(value = FetchMode.SUBSELECT)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "users_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
     private List<Role> roles;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @Fetch(value = FetchMode.SUBSELECT)
+    @JoinTable(name = "user_company",
+            joinColumns = @JoinColumn(name = "users_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "company_id", referencedColumnName = "id"))
+    private List<Company> companies;
 }
 

@@ -5,9 +5,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 
 @Getter
 @Setter
@@ -36,5 +35,16 @@ public class Company extends BaseEntity {
 
     @Column(name = "type")
     private String type;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "company_profile_id")
+    private CompanyProfile profile;
+
+    @ManyToMany(mappedBy = "companies", fetch = FetchType.LAZY)
+    private List<User> users;
+
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Quote> quotes;
+
 
 }

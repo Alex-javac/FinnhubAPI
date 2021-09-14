@@ -1,40 +1,43 @@
-package com.iTechArt.FinnhubAPI.model;
+package com.iTechArt.FinnhubAPI.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import com.iTechArt.FinnhubAPI.model.BaseEntity;
+import lombok.Data;
 
-import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
-@Getter
-@Setter
-@ToString
-@NoArgsConstructor
-@Entity
-@Table(name = "report")
-public class Report extends BaseEntity{
-    @Column(name = "unit")
-    private String unit;
+@Data
+public class FinancialStatement extends BaseEntity {
+    private String accessNumber;
+    private String symbol;
+    private String cik;
+    private Date year;
+    private String quarter;
+    private String form;
+    private Date startDate;
+    private Date endDate;
+    private Date filedDate;
+    private Date acceptedDate;
 
-    @Column(name = "label")
-    private Date label;
-
-    @Column(name = "value")
-    private long value;
-
-    @Column(name = "concept")
-    private String concept;
-
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "financial_statement_id")
-    private FinancialStatement financialStatement;
+    List<Report> bs;
+    List<Report> cf;
+    List<Report> ic;
 }
+
+
 /**
- *
+ * {"accessNumber":"0001564590-21-004599",
+ * "symbol":"TSLA",
+ * "cik":"1318605",
+ * "year":2020,
+ * "quarter":0,
+ * "form":"10-K",
+ * "startDate":"2020-01-01 00:00:00",
+ * "endDate":"2020-12-31 00:00:00",
+ * "filedDate":"2021-02-08 00:00:00",
+ * "acceptedDate":"2021-02-08 07:27:23",
  * "report":{
- * <p>
+ *
  * "bs":[
  * {"unit":"usd",
  * "label":"Cash and cash equivalents",
@@ -80,7 +83,7 @@ public class Report extends BaseEntity{
  * {"unit":"usd","label":"Equity","value":22225000000,"concept":"StockholdersEquity"},
  * {"unit":"usd","label":"Noncontrolling interests in subsidiaries","value":850000000,"concept":"MinorityInterest"},
  * {"unit":"usd","label":"Total liabilities and equity","value":52148000000,"concept":"LiabilitiesAndStockholdersEquity"}],
- *
+ * <p>
  * "cf":[
  * {"unit":"usd",
  * "label":"Net income (loss)",
@@ -125,7 +128,7 @@ public class Report extends BaseEntity{
  * {"unit":"usd","label":"Acquisitions of property and equipment included in liabilities","value":1088000000,"concept":"NoncashOrPartNoncashAcquisitionValueOfAssetsAcquired1"},
  * {"unit":"usd","label":"Cash paid during the period for interest, net of amounts capitalized","value":444000000,"concept":"InterestPaidNet"},
  * {"unit":"usd","label":"Cash paid during the period for taxes, net of refunds","value":115000000,"concept":"IncomeTaxesPaid"}],
- *
+ * <p>
  * "ic":[
  * {"unit":"usd",
  * "label":"Automotive leasing",

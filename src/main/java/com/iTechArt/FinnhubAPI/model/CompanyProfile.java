@@ -7,6 +7,7 @@ import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.util.Date;
 
@@ -16,7 +17,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Entity
 @Table(name = "company_profile")
-public class CompanyProfile extends BaseEntity{
+public class CompanyProfile extends BaseEntity {
 
     @Column(name = "country")
     private String country;
@@ -54,19 +55,20 @@ public class CompanyProfile extends BaseEntity{
     @Column(name = "weburl")
     private String weburl;
 
-
+    @OneToOne(mappedBy = "profile")
+    private Company profile;
 }
 /**
- {"country":"US",
- "currency":"USD",
- "exchange":"NASDAQ NMS - GLOBAL MARKET",
- "finnhubIndustry":"Technology",
- "ipo":"1980-12-12",
- "logo":"https://finnhub.io/api/logo?symbol=AAPL",
- "marketCapitalization":2546803,
- "name":"Apple Inc",
- "phone":"14089961010.0",
- "shareOutstanding":16687.631,
- "ticker":"AAPL",
- "weburl":"https://www.apple.com/"}
+ * {"country":"US",
+ * "currency":"USD",
+ * "exchange":"NASDAQ NMS - GLOBAL MARKET",
+ * "finnhubIndustry":"Technology",
+ * "ipo":"1980-12-12",
+ * "logo":"https://finnhub.io/api/logo?symbol=AAPL",
+ * "marketCapitalization":2546803,
+ * "name":"Apple Inc",
+ * "phone":"14089961010.0",
+ * "shareOutstanding":16687.631,
+ * "ticker":"AAPL",
+ * "weburl":"https://www.apple.com/"}
  */

@@ -5,41 +5,46 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.Date;
 
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @Entity
-@Table(name = "qote")
-public class Quote extends BaseEntity{
-    @Column (name = "c")
+@Table(name = "quote")
+public class Quote extends BaseEntity {
+    @Column(name = "c")
     private double c;//Current price
 
-    @Column (name = "d")
+    @Column(name = "d")
     private double d;//Change
 
-    @Column (name = "dp")
+    @Column(name = "dp")
     private double dp;//Percent change
 
-    @Column (name = "h")
+    @Column(name = "h")
     private double h;//High price of the day
 
-    @Column (name = "l")
+    @Column(name = "l")
     private double l;//Low price of the day
 
-    @Column (name = "o")
+    @Column(name = "o")
     private double o;//Open price of the day
 
-    @Column (name = "pc")
+    @Column(name = "pc")
     private double pc;//Previous close price
 
-    @Column (name = "t")
-    private double t;//
+    @Column(name = "t")
+    private double t;//????
 
+    @Column(name = "date")
+    private Date date;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
 }
 /**
  * {"c":148.97,
