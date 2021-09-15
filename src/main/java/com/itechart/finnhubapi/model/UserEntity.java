@@ -1,9 +1,8 @@
-package com.iTechArt.FinnhubAPI.model;
+package com.itechart.finnhubapi.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
@@ -13,11 +12,10 @@ import java.util.List;
 
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
-public class User extends BaseEntity {
+public class UserEntity extends BaseEntity {
 
     @Column(name = "email")
     private String email;
@@ -36,20 +34,20 @@ public class User extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "subscription_id")
-    private Subscription subscription;
+    private SubscriptionEntity subscription;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @Fetch(value = FetchMode.SUBSELECT)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "users_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
-    private List<Role> roles;
+    private List<RoleEntity> roles;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @Fetch(value = FetchMode.SUBSELECT)
     @JoinTable(name = "user_company",
             joinColumns = @JoinColumn(name = "users_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "company_id", referencedColumnName = "id"))
-    private List<Company> companies;
+    private List<CompanyEntity> companies;
 }
 

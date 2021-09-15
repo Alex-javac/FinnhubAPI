@@ -1,20 +1,18 @@
-package com.iTechArt.FinnhubAPI.model;
+package com.itechart.finnhubapi.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @Entity
 @Table(name = "quote")
-public class Quote extends BaseEntity {
+public class QuoteEntity extends BaseEntity {
     @Column(name = "c")
     private double c;//Current price
 
@@ -44,15 +42,5 @@ public class Quote extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "company_id")
-    private Company company;
+    private CompanyEntity company;
 }
-/**
- * {"c":148.97,
- * "d":-5.1,
- * "dp":-3.3102,
- * "h":155.48,
- * "l":148.7,
- * "o":155,
- * "pc":154.07,
- * "t":1631304001}
- */

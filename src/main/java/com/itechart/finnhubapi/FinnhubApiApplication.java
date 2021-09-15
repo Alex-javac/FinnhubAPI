@@ -1,4 +1,4 @@
-package com.iTechArt.FinnhubAPI;
+package com.itechart.finnhubapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
