@@ -1,4 +1,4 @@
-package com.itechart.finnhubapi.dto;
+package com.itechart.finnhubapi.dto.financialdto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,11 +1,8 @@
-package com.itechart.finnhubapi.dto;
+package com.itechart.finnhubapi.dto.financialdto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-
-import java.util.Date;
-import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

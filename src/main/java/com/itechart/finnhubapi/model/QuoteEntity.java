@@ -43,4 +43,19 @@ public class QuoteEntity extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "company_id")
     private CompanyEntity company;
+
+    @Override
+    public String toString() {
+        return "QuoteEntity{" +
+                "c=" + c +
+                ", d=" + d +
+                ", dp=" + dp +
+                ", h=" + h +
+                ", l=" + l +
+                ", o=" + o +
+                ", pc=" + pc +
+                ", t=" + t +
+                ", date=" + date +
+                '}';
+    }
 }
