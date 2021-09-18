@@ -10,8 +10,10 @@ import java.util.List;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FinancialStatementDto {
+    @JsonProperty("cik")
     private String cik;
     @JsonProperty("data")
-  private List<FinancialStatementDataDto> financialStatementDataDtoList;
+    private List<FinancialStatementDataDto> financialStatementDataDtoList;
+    @JsonProperty("symbol")
     private String symbol;
 }

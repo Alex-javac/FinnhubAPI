@@ -16,7 +16,7 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+//    private final BCryptPasswordEncoder passwordEncoder;
 
     public UserEntity findById(long id) {
         return userRepository.findById(id).orElse(null);
@@ -31,7 +31,7 @@ public class UserService {
         List<RoleEntity> userRoles = new ArrayList<>();
         userRoles.add(role);
         user.setRoles(userRoles);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(user.getPassword());
         UserEntity registeredUser = userRepository.save(user);
         return registeredUser;
     }

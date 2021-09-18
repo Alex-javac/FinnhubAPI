@@ -8,5 +8,5 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MetricDto {
     @JsonProperty("metric")
-    MetricDetailsDto metricDetails;
+   private MetricDetailsDto metricDetails;
 }

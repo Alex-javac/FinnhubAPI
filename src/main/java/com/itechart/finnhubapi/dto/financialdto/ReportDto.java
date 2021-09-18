@@ -10,9 +10,9 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReportDto {
     @JsonProperty("bs")
-    List<ReportDetailsDto> bs;
+    private List<ReportDetailsDto> bs;
     @JsonProperty("cf")
-    List<ReportDetailsDto> cf;
+    private List<ReportDetailsDto> cf;
     @JsonProperty("ic")
-    List<ReportDetailsDto> ic;
+    private List<ReportDetailsDto> ic;
 }
