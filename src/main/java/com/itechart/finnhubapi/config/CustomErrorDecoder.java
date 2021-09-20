@@ -1,11 +1,13 @@
 package com.itechart.finnhubapi.config;
 
+import com.itechart.finnhubapi.exceptions.StashClientException;
+import com.itechart.finnhubapi.exceptions.StashServerException;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 
 import static feign.FeignException.errorStatus;
 
-public class MyErrorDecoder implements ErrorDecoder {
+public class CustomErrorDecoder implements ErrorDecoder {
 
     @Override
     public Exception decode(String methodKey, Response response) {

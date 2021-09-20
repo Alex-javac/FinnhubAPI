@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 public class FeignConfig {
 
     @Bean
-    public MyErrorDecoder myErrorDecoder() {
-        return new MyErrorDecoder();
+    public CustomErrorDecoder myErrorDecoder() {
+        return new CustomErrorDecoder();
     }
 }

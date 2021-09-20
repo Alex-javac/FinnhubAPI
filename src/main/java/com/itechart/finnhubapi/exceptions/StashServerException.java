@@ -1,4 +1,4 @@
-package com.itechart.finnhubapi.config;
+package com.itechart.finnhubapi.exceptions;
 
 public class StashServerException extends Exception {
     private final int status;

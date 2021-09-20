@@ -1,5 +1,6 @@
 package com.itechart.finnhubapi.service;
 
+import com.itechart.finnhubapi.exceptions.UserNotFoundException;
 import com.itechart.finnhubapi.model.RoleEntity;
 import com.itechart.finnhubapi.model.UserEntity;
 import com.itechart.finnhubapi.repository.RoleRepository;
@@ -8,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +22,7 @@ public class UserService {
 //    private final BCryptPasswordEncoder passwordEncoder;
 
     public UserEntity findById(long id) {
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 
     public void deleteById(long id) {
