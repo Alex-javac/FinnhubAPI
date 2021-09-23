@@ -9,17 +9,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-//    private final BCryptPasswordEncoder passwordEncoder;
+    private BCryptPasswordEncoder passwordEncoder;
+
 
     public UserEntity findById(long id) {
         return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
@@ -34,7 +33,7 @@ public class UserService {
         List<RoleEntity> userRoles = new ArrayList<>();
         userRoles.add(role);
         user.setRoles(userRoles);
-        user.setPassword(user.getPassword());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         UserEntity registeredUser = userRepository.save(user);
         return registeredUser;
     }

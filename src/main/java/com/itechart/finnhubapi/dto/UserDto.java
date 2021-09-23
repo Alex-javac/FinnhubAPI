@@ -10,6 +10,8 @@ import lombok.Data;
 public class UserDto {
     @JsonProperty("id")
     private Long id;
+    @JsonProperty("oauth_id")
+    private String oauthID;
     @JsonProperty("login")
     private String username;
     @JsonProperty("first_name")
@@ -18,4 +20,5 @@ public class UserDto {
     private String lastName;
     @JsonProperty("email")
     private String email;
+
 }
