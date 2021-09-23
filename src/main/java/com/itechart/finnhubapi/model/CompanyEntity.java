@@ -34,10 +34,6 @@ public class CompanyEntity extends BaseEntity {
     @Column(name = "type")
     private String type;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "company_profile_id")
-    private CompanyProfileEntity profile;
-
     @ManyToMany(mappedBy = "companies", fetch = FetchType.LAZY)
     private List<UserEntity> users;
 
