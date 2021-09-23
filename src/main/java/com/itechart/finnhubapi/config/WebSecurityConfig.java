@@ -31,21 +31,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/").permitAll()
+                .antMatchers("/","/registration").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
-                .formLogin()
-                .loginPage("/auth/login").permitAll()
-                .defaultSuccessUrl("/auth/success")
+                .formLogin().permitAll()
+                .and()
+                .httpBasic()
                 .and()
                 .logout()
-                .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout", "POST"))
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
-                .deleteCookies("JSESSIONID")
-                .logoutSuccessUrl("/auth/login");
-        ;
+                .deleteCookies("JSESSIONID");
     }
 
     @Override

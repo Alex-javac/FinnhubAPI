@@ -1,5 +1,7 @@
 package com.itechart.finnhubapi.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,9 +36,11 @@ public class CompanyEntity extends BaseEntity {
     @Column(name = "type")
     private String type;
 
+    @JsonBackReference
     @ManyToMany(mappedBy = "companies", fetch = FetchType.LAZY)
     private List<UserEntity> users;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<QuoteEntity> quotes;
 }

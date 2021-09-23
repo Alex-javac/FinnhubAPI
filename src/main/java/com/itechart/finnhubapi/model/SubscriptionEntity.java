@@ -1,5 +1,6 @@
 package com.itechart.finnhubapi.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,6 +22,8 @@ public class SubscriptionEntity extends BaseEntity {
     @Column(name = "finish_time")
     private Date finishTime;
 
-    @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+
+    @JsonBackReference
+    @OneToMany(mappedBy = "subscription", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<UserEntity> users;
 }

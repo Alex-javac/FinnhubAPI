@@ -1,5 +1,6 @@
 package com.itechart.finnhubapi.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,6 +18,8 @@ import java.util.List;
 @Table(name = "users")
 public class UserEntity extends BaseEntity {
 
+    @Column(name = "oauth_id")
+    private String oauthID;
     @Column(name = "email")
     private String email;
     @Column(name = "login")
@@ -34,10 +37,12 @@ public class UserEntity extends BaseEntity {
     @Column(name = "status")
     private String status;
 
-    @ManyToOne
+    @JsonManagedReference
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "subscription_id")
     private SubscriptionEntity subscription;
 
+    @JsonManagedReference
     @ManyToMany(fetch = FetchType.EAGER)
     @Fetch(value = FetchMode.SUBSELECT)
     @JoinTable(name = "users_roles",
@@ -45,6 +50,7 @@ public class UserEntity extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
     private List<RoleEntity> roles;
 
+    @JsonManagedReference
     @ManyToMany(fetch = FetchType.EAGER)
     @Fetch(value = FetchMode.SUBSELECT)
     @JoinTable(name = "user_company",
