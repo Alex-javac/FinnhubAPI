@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +50,8 @@ public class UserService {
         userRoles.add(role);
         userEntity.setStatus("ACTIVE");
         userEntity.setRoles(userRoles);
+        userEntity.setCreated(LocalDateTime.now());
+        userEntity.setUpdated(LocalDateTime.now());
         userEntity.setPassword(passwordEncoder.encode(user.getPassword()));
         UserEntity registeredUser = userRepository.save(userEntity);
         return registeredUser;

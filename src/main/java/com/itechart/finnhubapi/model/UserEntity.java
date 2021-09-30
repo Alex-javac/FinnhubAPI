@@ -18,8 +18,6 @@ import java.util.List;
 @Table(name = "users")
 public class UserEntity extends BaseEntity {
 
-    @Column(name = "oauth_id")
-    private String oauthID;
     @Column(name = "email")
     private String email;
     @Column(name = "login")

@@ -63,7 +63,7 @@ public class SecurityUser implements UserDetails {
 
     public static UserDetails fromUser(UserEntity user) {
         return new org.springframework.security.core.userdetails.User(
-                user.getEmail(), user.getPassword(),
+                user.getUsername(), user.getPassword(),
                 user.getStatus().equals("ACTIVE"),
                 user.getStatus().equals("ACTIVE"),
                 user.getStatus().equals("ACTIVE"),
