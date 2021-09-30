@@ -31,6 +31,8 @@ public class UserEntity extends BaseEntity {
     private Date created;
     @Column(name = "updated")
     private Date updated;
+    @Column(name = "status")
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "subscription_id")
