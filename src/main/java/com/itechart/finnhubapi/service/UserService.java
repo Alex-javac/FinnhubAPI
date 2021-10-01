@@ -61,11 +61,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public UserDto findByEmail(String email) {
-        UserEntity userEntity = userRepository.findByEmail(email).get();
-        if (userEntity == null) {
-            throw new RuntimeException();
-        }
-        return UserMapper.INSTANCE.userToUserDto(userEntity);
+    public UserEntity findByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(()->new RuntimeException(email));
     }
 }

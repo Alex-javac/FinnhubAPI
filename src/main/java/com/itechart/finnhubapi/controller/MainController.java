@@ -35,11 +35,11 @@ public class MainController {
         return userService.findAll();
     }
 
-    @RequestMapping(value = "/userdata", method = RequestMethod.GET)
+    @RequestMapping(value = "/userdata", method = RequestMethod.POST)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     @ResponseBody
-    public UserDto userdata(@RequestBody String email) {
-        return userService.findByEmail(email);
+    public UserEntity userdata(@RequestBody Long id) {
+        return userService.findById(id);
     }
 
     @RequestMapping(value = "/company", method = RequestMethod.GET)
