@@ -1,5 +1,6 @@
 package com.itechart.finnhubapi.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,22 +41,8 @@ public class QuoteEntity extends BaseEntity {
     @Column(name = "date")
     private Date date;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "company_id")
     private CompanyEntity company;
-
-    @Override
-    public String toString() {
-        return "QuoteEntity{" +
-                "c=" + c +
-                ", d=" + d +
-                ", dp=" + dp +
-                ", h=" + h +
-                ", l=" + l +
-                ", o=" + o +
-                ", pc=" + pc +
-                ", t=" + t +
-                ", date=" + date +
-                '}';
-    }
 }

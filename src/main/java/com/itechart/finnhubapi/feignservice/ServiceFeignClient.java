@@ -1,6 +1,7 @@
 package com.itechart.finnhubapi.feignservice;
 
-import com.itechart.finnhubapi.dto.*;
+import com.itechart.finnhubapi.dto.CompanyDto;
+import com.itechart.finnhubapi.dto.QuoteDto;
 import com.itechart.finnhubapi.dto.financialdto.FinancialStatementDto;
 import com.itechart.finnhubapi.dto.metricdto.MetricDto;
 import org.springframework.cloud.openfeign.FeignClient;

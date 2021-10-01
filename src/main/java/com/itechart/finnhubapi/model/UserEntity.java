@@ -1,5 +1,6 @@
 package com.itechart.finnhubapi.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -7,7 +8,7 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -28,16 +29,18 @@ public class UserEntity extends BaseEntity {
     @Column(name = "last_name")
     private String lastName;
     @Column(name = "created")
-    private Date created;
+    private LocalDateTime created;
     @Column(name = "updated")
-    private Date updated;
+    private LocalDateTime updated;
     @Column(name = "status")
     private String status;
 
-    @ManyToOne
+    @JsonManagedReference
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "subscription_id")
     private SubscriptionEntity subscription;
 
+    @JsonManagedReference
     @ManyToMany(fetch = FetchType.EAGER)
     @Fetch(value = FetchMode.SUBSELECT)
     @JoinTable(name = "users_roles",
@@ -45,6 +48,7 @@ public class UserEntity extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
     private List<RoleEntity> roles;
 
+    @JsonManagedReference
     @ManyToMany(fetch = FetchType.EAGER)
     @Fetch(value = FetchMode.SUBSELECT)
     @JoinTable(name = "user_company",
