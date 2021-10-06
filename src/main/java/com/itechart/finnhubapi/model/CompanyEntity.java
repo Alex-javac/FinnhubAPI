@@ -41,6 +41,6 @@ public class CompanyEntity extends BaseEntity {
     private List<UserEntity> users;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<QuoteEntity> quotes;
 }

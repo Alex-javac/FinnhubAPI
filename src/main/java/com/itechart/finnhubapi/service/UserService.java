@@ -1,8 +1,11 @@
 package com.itechart.finnhubapi.service;
 
+import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.UserDto;
 import com.itechart.finnhubapi.exceptions.UserNotFoundException;
+import com.itechart.finnhubapi.mapper.CompanyMapper;
 import com.itechart.finnhubapi.mapper.UserMapper;
+import com.itechart.finnhubapi.model.CompanyEntity;
 import com.itechart.finnhubapi.model.RoleEntity;
 import com.itechart.finnhubapi.model.SubscriptionEntity;
 import com.itechart.finnhubapi.model.UserEntity;
@@ -16,19 +19,22 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final CompanyService companyService;
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, SubscriptionRepository subscriptionRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, SubscriptionRepository subscriptionRepository, CompanyService companyService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.companyService = companyService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -57,11 +63,42 @@ public class UserService {
         return registeredUser;
     }
 
+    public UserEntity updateUser(UserDto user) {
+        UserEntity userEntity = userRepository.getById(user.getId());
+        if(user.getFirstName()!=null){userEntity.setFirstName(user.getFirstName());}
+        if(user.getLastName()!=null){userEntity.setLastName(user.getLastName());}
+        if(user.getUsername()!=null){userEntity.setUsername(user.getUsername());}
+        if(user.getEmail()!=null) {userEntity.setEmail(user.getEmail());}
+        if(user.getPassword()!=null){userEntity.setPassword(passwordEncoder.encode(user.getPassword()));}
+        userEntity.setUpdated(LocalDateTime.now());
+        return userRepository.save(userEntity);
+    }
+
     public List<UserEntity> findAll() {
         return userRepository.findAll();
     }
 
-    public UserEntity findByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(()->new RuntimeException(email));
+    public UserEntity addCompany(Long id, List<String> companyDto) {
+        UserEntity user = userRepository.getById(id);
+        List<CompanyEntity> companyEntities = companyDto
+                .stream()
+                .map(companyService::getEntityBySymbol)
+                .collect(Collectors.toList());
+        user.setCompanies(companyEntities);
+        return userRepository.save(user);
+    }
+
+    public UserEntity lockOrUnlock(Long id, String status) {
+        UserEntity user = userRepository.getById(id);
+        user.setStatus(status);
+        return userRepository.save(user);
+    }
+
+    public List<CompanyDto> getCompaniesFromUser(Long id) {
+        List<CompanyEntity> companies = findById(id).getCompanies();
+        return companies
+                .stream()
+                .map(CompanyMapper.INSTANCE::companyToCompanyDto)
+                .collect(Collectors.toList());
     }
 }
