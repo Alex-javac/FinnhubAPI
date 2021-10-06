@@ -8,14 +8,16 @@ import com.itechart.finnhubapi.model.CompanyEntity;
 import com.itechart.finnhubapi.model.QuoteEntity;
 import com.itechart.finnhubapi.repository.CompanyRepository;
 import com.itechart.finnhubapi.repository.QuoteRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CompanyService {
     @Value(value = "${feign.token}")
     private String token;
@@ -23,17 +25,9 @@ public class CompanyService {
     private final QuoteRepository quoteRepository;
     private final ServiceFeignClient serviceFeignClient;
 
-
-    public CompanyService(ServiceFeignClient serviceFeignClient, CompanyRepository companyRepository, QuoteRepository quoteRepository) {
-        this.serviceFeignClient = serviceFeignClient;
-        this.companyRepository = companyRepository;
-        this.quoteRepository = quoteRepository;
-    }
-
     public CompanyEntity getEntityBySymbol(String symbol) {
-        return  companyRepository.findBySymbol(symbol).orElseThrow(
+        return companyRepository.findBySymbol(symbol).orElseThrow(
                 () -> new RuntimeException(String.format("company named %s was not found", symbol)));
-
     }
 
     public CompanyDto getBySymbol(String symbol) {
@@ -70,8 +64,12 @@ public class CompanyService {
             try {
                 Thread.sleep(40);
             } catch (InterruptedException e) {
-             throw new RuntimeException(e);
+                throw new RuntimeException(e);
             }
         });
+    }
+
+    public void deleteCompany(String symbol) {
+        companyRepository.deleteBySymbol(symbol);
     }
 }

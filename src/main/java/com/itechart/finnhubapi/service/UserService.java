@@ -9,10 +9,14 @@ import com.itechart.finnhubapi.model.CompanyEntity;
 import com.itechart.finnhubapi.model.RoleEntity;
 import com.itechart.finnhubapi.model.SubscriptionEntity;
 import com.itechart.finnhubapi.model.UserEntity;
+import com.itechart.finnhubapi.repository.CompanyRepository;
 import com.itechart.finnhubapi.repository.RoleRepository;
 import com.itechart.finnhubapi.repository.SubscriptionRepository;
 import com.itechart.finnhubapi.repository.UserRepository;
+import com.itechart.finnhubapi.util.UserUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,21 +26,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final SubscriptionRepository subscriptionRepository;
-    private final CompanyService companyService;
+    private final CompanyRepository companyRepository;
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, SubscriptionRepository subscriptionRepository, CompanyService companyService, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.subscriptionRepository = subscriptionRepository;
-        this.companyService = companyService;
-        this.passwordEncoder = passwordEncoder;
-    }
 
 
     public UserEntity findById(long id) {
@@ -64,12 +60,22 @@ public class UserService {
     }
 
     public UserEntity updateUser(UserDto user) {
-        UserEntity userEntity = userRepository.getById(user.getId());
-        if(user.getFirstName()!=null){userEntity.setFirstName(user.getFirstName());}
-        if(user.getLastName()!=null){userEntity.setLastName(user.getLastName());}
-        if(user.getUsername()!=null){userEntity.setUsername(user.getUsername());}
-        if(user.getEmail()!=null) {userEntity.setEmail(user.getEmail());}
-        if(user.getPassword()!=null){userEntity.setPassword(passwordEncoder.encode(user.getPassword()));}
+        UserEntity userEntity = findByUsername(UserUtil.userName());
+        if (user.getFirstName() != null) {
+            userEntity.setFirstName(user.getFirstName());
+        }
+        if (user.getLastName() != null) {
+            userEntity.setLastName(user.getLastName());
+        }
+        if (user.getUsername() != null) {
+            userEntity.setUsername(user.getUsername());
+        }
+        if (user.getEmail() != null) {
+            userEntity.setEmail(user.getEmail());
+        }
+        if (user.getPassword() != null) {
+            userEntity.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
         userEntity.setUpdated(LocalDateTime.now());
         return userRepository.save(userEntity);
     }
@@ -78,13 +84,13 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public UserEntity addCompany(Long id, List<String> companyDto) {
-        UserEntity user = userRepository.getById(id);
-        List<CompanyEntity> companyEntities = companyDto
-                .stream()
-                .map(companyService::getEntityBySymbol)
-                .collect(Collectors.toList());
-        user.setCompanies(companyEntities);
+    public UserEntity addCompany(String symbol) {
+        UserEntity user = findByUsername(UserUtil.userName());
+        CompanyEntity company = companyRepository.findBySymbol(symbol).orElseThrow(
+                () -> new RuntimeException(String.format("company named %s was not found", symbol)));
+        List<CompanyEntity> companies = user.getCompanies();
+        companies.add(company);
+        user.setCompanies(companies);
         return userRepository.save(user);
     }
 
@@ -94,11 +100,16 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public List<CompanyDto> getCompaniesFromUser(Long id) {
-        List<CompanyEntity> companies = findById(id).getCompanies();
+    public List<CompanyDto> getCompaniesFromUser(String username) {
+        List<CompanyEntity> companies = findByUsername(username).getCompanies();
         return companies
                 .stream()
                 .map(CompanyMapper.INSTANCE::companyToCompanyDto)
                 .collect(Collectors.toList());
+    }
+
+    public UserEntity findByUsername(String userName) {
+        return userRepository.findByUsername(userName).orElseThrow(() ->
+                new UsernameNotFoundException("User doesn't exists"));
     }
 }

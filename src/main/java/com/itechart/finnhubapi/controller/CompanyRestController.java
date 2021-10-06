@@ -2,51 +2,59 @@ package com.itechart.finnhubapi.controller;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.model.CompanyEntity;
-import com.itechart.finnhubapi.model.UserEntity;
 import com.itechart.finnhubapi.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/v1/company",produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/v1/company", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CompanyRestController {
 
     private final CompanyService companyService;
 
-    @GetMapping(value = "/all")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @ResponseBody
-    public List<CompanyEntity> company() {
+    @GetMapping(value = "/getAllCompanies")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<List<CompanyEntity>> getAllCompanies() {
         List<CompanyEntity> data = companyService.findAll();
-        return data;
+        return new ResponseEntity<>(data, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/saveAll")
+    @GetMapping(value = "/getOneCompany/{symbol}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<CompanyDto> getOneCompany(@PathVariable("symbol") String symbol) {
+        CompanyDto companyDto = companyService.getBySymbol(symbol);
+        return new ResponseEntity<>(companyDto, HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/saveAllCompanies")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @ResponseBody
     public void saveCompanyToDB() {
         List<CompanyDto> companyFromFeign = companyService.getAllCompanyFromFeign();
         companyService.save(companyFromFeign);
     }
 
-    @GetMapping(value = "/getOne/{symbol}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    public CompanyDto getOne(@PathVariable("symbol") String symbol) {
-        return companyService.getBySymbol(symbol);
-    }
-
     @PostMapping(value = "/saveQuotes")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @ResponseBody
     public void saveQuoteToDB() {
         List<CompanyEntity> company = companyService.findAll();
         companyService.saveQuote(company);
+    }
 
+    @PostMapping(value = "/deleteCompany/{symbol}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void deleteCompany(@PathVariable("symbol") String symbol) {
+        companyService.deleteCompany(symbol);
     }
 }

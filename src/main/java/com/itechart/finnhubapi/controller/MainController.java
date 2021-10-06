@@ -5,11 +5,19 @@ import com.itechart.finnhubapi.model.UserEntity;
 import com.itechart.finnhubapi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping(value = "/api/v1", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MainController {
 
@@ -17,38 +25,37 @@ public class MainController {
 
 
     @PostMapping(value = "/registration")
-    @ResponseBody
-    public UserEntity registration(@RequestBody UserDto userDto) {
-        return userService.saveUser(userDto);
+    public ResponseEntity<UserEntity> registration(@RequestBody UserDto userDto) {
+        UserEntity saveUser = userService.saveUser(userDto);
+        return new ResponseEntity<>(saveUser, HttpStatus.CREATED);
     }
 
-    @PostMapping(value = "/update")
+    @PostMapping(value = "/updateUser")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    @ResponseBody
-    public UserEntity update(@RequestBody UserDto userDto) {
-        return userService.updateUser(userDto);
+    public ResponseEntity<UserEntity> updateUser(@RequestBody UserDto userDto) {
+        UserEntity updateUser = userService.updateUser(userDto);
+        return new ResponseEntity<>(updateUser, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/locking/{id}")
+    @GetMapping(value = "/lockingUser/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @ResponseBody
-    public UserEntity locking(@PathVariable("id") Long id) {
-        return userService.lockOrUnlock(id, "BLOCKED");
+    public ResponseEntity<UserEntity> locking(@PathVariable("id") Long id) {
+        UserEntity blockedUser = userService.lockOrUnlock(id, "BLOCKED");
+        return new ResponseEntity<>(blockedUser, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/unlocking/{id}")
+    @GetMapping(value = "/unlockingUser/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @ResponseBody
-    public UserEntity unlocking(@PathVariable("id") Long id) {
-        return userService.lockOrUnlock(id, "ACTIVE");
+    public ResponseEntity<UserEntity> unlocking(@PathVariable("id") Long id) {
+        UserEntity activeUser = userService.lockOrUnlock(id, "ACTIVE");
+        return new ResponseEntity<>(activeUser, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/delete/{id}")
+    @GetMapping(value = "/deleteUser/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @ResponseBody
-    public String delete(@PathVariable("id") Long id) {
+    public ResponseEntity<String> delete(@PathVariable("id") Long id) {
         userService.deleteById(id);
-        return String.format("User with id %d destroyed", id);
+        return new ResponseEntity<>(String.format("User with id %d destroyed", id), HttpStatus.OK);
     }
 
 }
