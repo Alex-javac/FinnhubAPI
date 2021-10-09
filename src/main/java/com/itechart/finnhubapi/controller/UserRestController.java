@@ -57,5 +57,10 @@ public class UserRestController {
         List<CompanyDto> companiesFromUser = userService.getCompaniesFromUser(UserUtil.userName());
         return new ResponseEntity<>(companiesFromUser, HttpStatus.OK);
     }
-
+    @PostMapping(value = "/deleteOneCompanyFromUser")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<List<CompanyDto>> deleteOneCompanyFromUser(@RequestBody String symbol) {
+        List<CompanyDto> companiesFromUser = userService.deleteOneCompanyFromUser(symbol);
+        return new ResponseEntity<>(companiesFromUser, HttpStatus.OK);
+    }
 }

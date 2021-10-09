@@ -36,13 +36,14 @@ public class CompanyService {
         return CompanyMapper.INSTANCE.companyToCompanyDto(bySymbol);
     }
 
-    public void save(List<CompanyDto> companyDtos) {
-        companyDtos.forEach(companyDto ->
+    public boolean save(List<CompanyDto> companyDtos) {
+        companyDtos.stream().limit(100).forEach(companyDto ->
                 companyRepository.findBySymbol(companyDto.getSymbol())
                         .orElseGet(() -> {
                             CompanyEntity companyEntity = CompanyMapper.INSTANCE.companyDtoToCompanyEntity(companyDto);
                             return companyRepository.save(companyEntity);
                         }));
+        return true;
     }
 
     public List<CompanyDto> getAllCompanyFromFeign() {
@@ -54,7 +55,7 @@ public class CompanyService {
     }
 
 
-    public void saveQuote(List<CompanyEntity> company) {
+    public boolean saveQuote(List<CompanyEntity> company) {
         company.forEach(c -> {
             QuoteEntity quote = QuoteMapper.INSTANCE.quoteDtoToQuoteEntity(
                     serviceFeignClient.getQuote(c.getSymbol(), token));
@@ -67,9 +68,10 @@ public class CompanyService {
                 throw new RuntimeException(e);
             }
         });
+        return true;
     }
 
-    public void deleteCompany(String symbol) {
-        companyRepository.deleteBySymbol(symbol);
+    public boolean deleteCompany(String symbol) {
+        return companyRepository.deleteBySymbol(symbol);
     }
 }

@@ -1,6 +1,7 @@
 package com.itechart.finnhubapi.controller;
 
 import com.itechart.finnhubapi.dto.UserDto;
+import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.model.UserEntity;
 import com.itechart.finnhubapi.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -58,4 +59,17 @@ public class MainController {
         return new ResponseEntity<>(String.format("User with id %d destroyed", id), HttpStatus.OK);
     }
 
+    @PostMapping(value = "/changeSubscription")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<UserEntity> changeSubscription(@RequestBody Subscription subscription) {
+        UserEntity user = userService.changeSubscription(subscription);
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/renewSubscription")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<UserEntity> renewSubscription(@RequestBody long month) {
+        UserEntity user = userService.renewSubscription(month);
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
 }
