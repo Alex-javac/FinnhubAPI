@@ -2,7 +2,7 @@ package com.itechart.finnhubapi.dto.financialdto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import lombok.Data;
 
 import java.util.List;
 

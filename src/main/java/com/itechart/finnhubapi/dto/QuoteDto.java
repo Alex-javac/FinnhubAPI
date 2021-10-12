@@ -2,7 +2,6 @@ package com.itechart.finnhubapi.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.itechart.finnhubapi.model.QuoteEntity;
 import lombok.Data;
 
 @Data
