@@ -153,7 +153,7 @@ public class UserService {
         subscriptionEntity.setStartTime(LocalDateTime.now());
         subscriptionEntity.setFinishTime(LocalDateTime.now().plusMonths(3));
         SubscriptionEntity saveSubscription = subscriptionRepository.save(subscriptionEntity);
-        if (subscription.toString().equals("LOW")) {
+        if (subscription.toString().equals("LOW")&&user.getCompanies().size()>2) {
             List<CompanyEntity> companies = user.getCompanies();
             companies.remove(companies.size() - 1);
             user.setCompanies(companies);

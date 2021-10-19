@@ -7,5 +7,4 @@ import java.util.Optional;
 
 public interface CompanyRepository extends JpaRepository<CompanyEntity, Long> {
     Optional<CompanyEntity> findBySymbol(String symbol);
-    boolean deleteBySymbol(String symbol);
 }

@@ -76,7 +76,7 @@ public class MainController {
     }
 
     @GetMapping(value = "/sendEmail")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity sendEmail(String email) {
 
         SimpleMailMessage message = new SimpleMailMessage();
