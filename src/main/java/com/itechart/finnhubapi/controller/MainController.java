@@ -62,14 +62,14 @@ public class MainController {
     }
 
     @PostMapping(value = "/changeSubscription")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserEntity> changeSubscription(@RequestBody Subscription subscription) {
         UserEntity user = userService.changeSubscription(subscription);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @PostMapping(value = "/renewSubscription")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserEntity> renewSubscription(@RequestBody long month) {
         UserEntity user = userService.renewSubscription(month);
         return new ResponseEntity<>(user, HttpStatus.OK);
