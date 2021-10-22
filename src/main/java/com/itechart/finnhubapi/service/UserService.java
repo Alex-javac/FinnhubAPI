@@ -5,7 +5,11 @@ import com.itechart.finnhubapi.dto.UserDto;
 import com.itechart.finnhubapi.exceptions.UserNotFoundException;
 import com.itechart.finnhubapi.mapper.CompanyMapper;
 import com.itechart.finnhubapi.mapper.UserMapper;
-import com.itechart.finnhubapi.model.*;
+import com.itechart.finnhubapi.model.CompanyEntity;
+import com.itechart.finnhubapi.model.RoleEntity;
+import com.itechart.finnhubapi.model.Subscription;
+import com.itechart.finnhubapi.model.SubscriptionEntity;
+import com.itechart.finnhubapi.model.UserEntity;
 import com.itechart.finnhubapi.repository.CompanyRepository;
 import com.itechart.finnhubapi.repository.RoleRepository;
 import com.itechart.finnhubapi.repository.SubscriptionRepository;
@@ -62,7 +66,10 @@ public class UserService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(savedUser.getEmail());
         message.setSubject("FinnhubAPI");
-        message.setText("You are registered successfully");
+        message.setText("Hello!\n" +
+                " You have successfully registered on the FinnhubAPI \n" +
+                "Your login: " + user.getUsername() + "\n" +
+                "Your password: " + user.getPassword());
         emailSender.send(message);
         return savedUser;
     }
@@ -117,13 +124,13 @@ public class UserService {
         UserEntity user = userRepository.getById(id);
         user.setStatus(status);
         UserEntity userEntity = userRepository.save(user);
-        if(status.equals("ACTIVE")){
+        if (status.equals("ACTIVE")) {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(userEntity.getEmail());
             message.setSubject("FinnhubAPI");
             message.setText("you were unblocked");
             emailSender.send(message);
-        }else {
+        } else {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(userEntity.getEmail());
             message.setSubject("FinnhubAPI");
@@ -153,7 +160,7 @@ public class UserService {
         subscriptionEntity.setStartTime(LocalDateTime.now());
         subscriptionEntity.setFinishTime(LocalDateTime.now().plusMonths(3));
         SubscriptionEntity saveSubscription = subscriptionRepository.save(subscriptionEntity);
-        if (subscription.toString().equals("LOW")&&user.getCompanies().size()>2) {
+        if (subscription.toString().equals("LOW") && user.getCompanies().size() > 2) {
             List<CompanyEntity> companies = user.getCompanies();
             companies.remove(companies.size() - 1);
             user.setCompanies(companies);

@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class MainController {
 
     private final UserService userService;
-    private final JavaMailSender emailSender;
 
     @PostMapping(value = "/registration")
     public ResponseEntity<UserEntity> registration(@RequestBody UserDto userDto) {
@@ -75,16 +72,4 @@ public class MainController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/sendEmail")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity sendEmail(String email) {
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("FinnhubAPI");
-        message.setText("this is a test message");
-        emailSender.send(message);
-
-        return new ResponseEntity(HttpStatus.OK);
-    }
 }

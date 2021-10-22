@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -73,9 +72,9 @@ public class CompanyService {
     }
 
     public boolean deleteCompany(String symbol) {
-        CompanyEntity bySymbol = companyRepository.findBySymbol(symbol).orElseThrow(
+        CompanyEntity company = companyRepository.findBySymbol(symbol).orElseThrow(
                 () -> new RuntimeException(String.format("company named %s was not found", symbol)));
-        Long id = bySymbol.getId();
+        Long id = company.getId();
         companyRepository.deleteById(id);
         return companyRepository.existsById(id);
     }
