@@ -42,28 +42,28 @@ public class CompanyRestController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity saveCompanyToDB() {
         List<CompanyDto> companyFromFeign = companyService.getAllCompanyFromFeign();
-       if(companyService.save(companyFromFeign)){
-           return new ResponseEntity(HttpStatus.OK);
-       } else {
-           return new ResponseEntity(HttpStatus.NOT_MODIFIED);
-       }
+        if (companyService.save(companyFromFeign)) {
+            return new ResponseEntity(HttpStatus.OK);
+        } else {
+            return new ResponseEntity(HttpStatus.NOT_MODIFIED);
+        }
     }
 
     @PostMapping(value = "/saveQuotes")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity saveQuoteToDB() {
         List<CompanyEntity> company = companyService.findAll();
-       if(companyService.saveQuote(company)){
-           return new ResponseEntity(HttpStatus.OK);
-       } else {
-           return new ResponseEntity(HttpStatus.NOT_MODIFIED);
-       }
+        if (companyService.saveQuote(company)) {
+            return new ResponseEntity(HttpStatus.OK);
+        } else {
+            return new ResponseEntity(HttpStatus.NOT_MODIFIED);
+        }
     }
 
     @PostMapping(value = "/deleteCompany/{symbol}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity deleteCompany(@PathVariable("symbol") String symbol) {
-        if (companyService.deleteCompany(symbol)) {
+        if (!companyService.deleteCompany(symbol)) {
             return new ResponseEntity(HttpStatus.OK);
         } else {
             return new ResponseEntity(HttpStatus.NOT_MODIFIED);

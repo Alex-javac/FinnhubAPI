@@ -72,6 +72,10 @@ public class CompanyService {
     }
 
     public boolean deleteCompany(String symbol) {
-        return companyRepository.deleteBySymbol(symbol);
+        CompanyEntity company = companyRepository.findBySymbol(symbol).orElseThrow(
+                () -> new RuntimeException(String.format("company named %s was not found", symbol)));
+        Long id = company.getId();
+        companyRepository.deleteById(id);
+        return companyRepository.existsById(id);
     }
 }

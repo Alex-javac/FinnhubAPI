@@ -17,6 +17,8 @@ import com.itechart.finnhubapi.repository.UserRepository;
 import com.itechart.finnhubapi.util.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,7 +36,7 @@ public class UserService {
     private final SubscriptionRepository subscriptionRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
-
+    private final JavaMailSender emailSender;
 
     public UserEntity findById(long id) {
         return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
@@ -60,7 +62,16 @@ public class UserService {
         userEntity.setCreated(LocalDateTime.now());
         userEntity.setUpdated(LocalDateTime.now());
         userEntity.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(userEntity);
+        UserEntity savedUser = userRepository.save(userEntity);
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(savedUser.getEmail());
+        message.setSubject("FinnhubAPI");
+        message.setText("Hello!\n" +
+                " You have successfully registered on the FinnhubAPI \n" +
+                "Your login: " + user.getUsername() + "\n" +
+                "Your password: " + user.getPassword());
+        emailSender.send(message);
+        return savedUser;
     }
 
     public UserEntity updateUser(UserDto user) {
@@ -95,17 +106,15 @@ public class UserService {
                 () -> new RuntimeException(String.format("company named %s was not found", symbol)));
         List<CompanyEntity> companies = user.getCompanies();
         if ("LOW".equals(subscription.getName())) {
-            if (companies.size() < 2) {
-                companies.add(company);
-            } else {
-                companies.set(0, company);
+            if (companies.size() >= 2) {
+                companies.remove(0);
             }
+            companies.add(company);
         } else if ("MEDIUM".equals(subscription.getName()) || "HIGH".equals(subscription.getName())) {
-            if (companies.size() < 3) {
-                companies.add(company);
-            } else {
-                companies.set(0, company);
+            if (companies.size() >= 3) {
+                companies.remove(0);
             }
+            companies.add(company);
         }
         user.setCompanies(companies);
         return userRepository.save(user);
@@ -114,7 +123,21 @@ public class UserService {
     public UserEntity lockOrUnlock(Long id, String status) {
         UserEntity user = userRepository.getById(id);
         user.setStatus(status);
-        return userRepository.save(user);
+        UserEntity userEntity = userRepository.save(user);
+        if (status.equals("ACTIVE")) {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(userEntity.getEmail());
+            message.setSubject("FinnhubAPI");
+            message.setText("you were unblocked");
+            emailSender.send(message);
+        } else {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(userEntity.getEmail());
+            message.setSubject("FinnhubAPI");
+            message.setText("you were blocked");
+            emailSender.send(message);
+        }
+        return userEntity;
     }
 
     public List<CompanyDto> getCompaniesFromUser(String username) {
@@ -137,9 +160,9 @@ public class UserService {
         subscriptionEntity.setStartTime(LocalDateTime.now());
         subscriptionEntity.setFinishTime(LocalDateTime.now().plusMonths(3));
         SubscriptionEntity saveSubscription = subscriptionRepository.save(subscriptionEntity);
-        if(subscription.toString().equals("LOW")){
+        if (subscription.toString().equals("LOW") && user.getCompanies().size() > 2) {
             List<CompanyEntity> companies = user.getCompanies();
-            companies.remove(companies.size()-1);
+            companies.remove(companies.size() - 1);
             user.setCompanies(companies);
         }
         user.setSubscription(saveSubscription);
@@ -164,7 +187,7 @@ public class UserService {
         companies.remove(company);
         user.setCompanies(companies);
         UserEntity userEntity = userRepository.save(user);
-       return userEntity.getCompanies()
+        return userEntity.getCompanies()
                 .stream()
                 .map(CompanyMapper.INSTANCE::companyToCompanyDto)
                 .collect(Collectors.toList());
