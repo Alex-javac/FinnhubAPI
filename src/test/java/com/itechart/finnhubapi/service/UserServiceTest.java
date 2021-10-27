@@ -1,6 +1,7 @@
 package com.itechart.finnhubapi.service;
 
 
+import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.mapper.UserMapper;
 import com.itechart.finnhubapi.model.CompanyEntity;
 import com.itechart.finnhubapi.model.RoleEntity;
@@ -58,9 +59,11 @@ public class UserServiceTest {
     private final UserEntity user = new UserEntity();
     private final SubscriptionEntity subscription = new SubscriptionEntity();
     private final RoleEntity role = new RoleEntity();
+   private final CompanyEntity company = new CompanyEntity();
 
     @BeforeEach
     void setUp() {
+
         user.setId(3L);
         user.setEmail("test@gmail.com");
         user.setUsername("testUser");
@@ -78,6 +81,14 @@ public class UserServiceTest {
         List<RoleEntity> listRole = new ArrayList<>();
         listRole.add(role);
         user.setRoles(listRole);
+        company.setSymbol("WDGJF");
+        company.setMic("OOTC");
+        company.setType("Common Stock");
+        company.setId(2L);
+        company.setFigi("BBG000BJL537");
+        company.setCurrency("USD");
+        company.setDescription("JOHN WOOD GROUP PLC");
+        company.setDisplaySymbol("WDGJF");
         user.setCompanies(new ArrayList<>());
     }
 
@@ -133,15 +144,6 @@ public class UserServiceTest {
 
     @Test
     void addCompany() {
-        CompanyEntity company = new CompanyEntity();
-        company.setSymbol("WDGJF");
-        company.setMic("OOTC");
-        company.setType("Common Stock");
-        company.setId(2L);
-        company.setFigi("BBG000BJL537");
-        company.setCurrency("USD");
-        company.setDescription("JOHN WOOD GROUP PLC");
-        company.setDisplaySymbol("WDGJF");
         doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
         doReturn(Optional.of(company)).when(companyRepository).findBySymbol(any());
         doReturn(user).when(userRepository).save(any(UserEntity.class));
@@ -176,6 +178,13 @@ public class UserServiceTest {
 
     @Test
     void getCompaniesFromUser() {
+        List<CompanyEntity> companyEntities = new ArrayList<>();
+        companyEntities.add(company);
+        user.setCompanies(companyEntities);
+        doReturn(Optional.of(user)).when(userRepository).findByUsername(user.getUsername());
+        List<CompanyDto> companiesFromUser = userService.getCompaniesFromUser(user.getUsername());
+        assertThat(companiesFromUser).isNotNull();
+        verify(userRepository, times(1)).findByUsername(user.getUsername());
     }
 
 
@@ -189,6 +198,14 @@ public class UserServiceTest {
 
     @Test
     void deleteOneCompanyFromUser() {
+        List<CompanyEntity> companyEntities = new ArrayList<>();
+        companyEntities.add(company);
+        user.setCompanies(companyEntities);
+       doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
+        doReturn(Optional.of(company)).when(companyRepository).findBySymbol(any());
+        doReturn(user).when(userRepository).save(any(UserEntity.class));
+        List<CompanyDto> companiesFromUser = userService.deleteOneCompanyFromUser(company.getSymbol());
+        assertThat(companiesFromUser.size()).isZero();
     }
 
 }
