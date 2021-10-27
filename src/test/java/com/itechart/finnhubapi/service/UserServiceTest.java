@@ -59,7 +59,7 @@ public class UserServiceTest {
     private final UserEntity user = new UserEntity();
     private final SubscriptionEntity subscription = new SubscriptionEntity();
     private final RoleEntity role = new RoleEntity();
-   private final CompanyEntity company = new CompanyEntity();
+    private final CompanyEntity company = new CompanyEntity();
 
     @BeforeEach
     void setUp() {
@@ -97,7 +97,7 @@ public class UserServiceTest {
     void findById() {
         doReturn(Optional.of(user)).when(userRepository).findById(3L);
         UserEntity userEntity = userService.findById(3L);
-        assertThat(user).isEqualTo(userEntity);
+        assertThat(userEntity).isEqualTo(user);
     }
 
     @Test
@@ -118,7 +118,7 @@ public class UserServiceTest {
     void saveUser() {
         doReturn(user).when(userRepository).save(any(UserEntity.class));
         UserEntity userEntity = userService.saveUser(UserMapper.INSTANCE.userToUserDto(user));
-        assertThat(user).isEqualTo(userEntity);
+        assertThat(userEntity).isEqualTo(user);
         verify(userRepository, times(1)).save(any(UserEntity.class));
     }
 
@@ -127,7 +127,7 @@ public class UserServiceTest {
         doReturn(user).when(userRepository).save(any(UserEntity.class));
         doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
         UserEntity userEntity = userService.updateUser(UserMapper.INSTANCE.userToUserDto(user));
-        assertThat(user).isEqualTo(userEntity);
+        assertThat(userEntity).isEqualTo(user);
         verify(userRepository, times(1)).save(any(UserEntity.class));
         verify(userRepository, times(1)).findByUsername(any());
     }
@@ -138,7 +138,7 @@ public class UserServiceTest {
         userList.add(user);
         doReturn(userList).when(userRepository).findAll();
         List<UserEntity> entityList = userRepository.findAll();
-        assertThat(userList).isNotNull().isEqualTo(entityList);
+        assertThat(entityList).isNotNull().isEqualTo(userList);
         verify(userRepository, times(1)).findAll();
     }
 
@@ -148,7 +148,7 @@ public class UserServiceTest {
         doReturn(Optional.of(company)).when(companyRepository).findBySymbol(any());
         doReturn(user).when(userRepository).save(any(UserEntity.class));
         UserEntity userEntity = userService.addCompany(company.getSymbol());
-        assertThat(user).isEqualTo(userEntity);
+        assertThat(userEntity).isEqualTo(user);
         assertThat(userEntity.getCompanies()).isNotEmpty();
         verify(userRepository, times(1)).save(any(UserEntity.class));
         verify(userRepository, times(1)).findByUsername(any());
@@ -161,7 +161,7 @@ public class UserServiceTest {
         doReturn(user).when(userRepository).getById(any());
         doReturn(user).when(userRepository).save(any(UserEntity.class));
         UserEntity userEntity = userService.lockOrUnlock(user.getId(), "BLOCKED");
-        assertThat(user).isEqualTo(userEntity);
+        assertThat(userEntity).isEqualTo(user);
         verify(userRepository, times(1)).save(any(UserEntity.class));
         verify(userRepository, times(1)).getById(any());
     }
@@ -171,7 +171,7 @@ public class UserServiceTest {
     void findByUsername() {
         doReturn(Optional.of(user)).when(userRepository).findByUsername(user.getUsername());
         UserEntity userEntity = userService.findByUsername(user.getUsername());
-        assertThat(user).isEqualTo(userEntity);
+        assertThat(userEntity).isEqualTo(user);
         verify(userRepository, times(1)).findByUsername(any());
     }
 
@@ -190,10 +190,28 @@ public class UserServiceTest {
 
     @Test
     void changeSubscription() {
+        doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
+        doReturn(user.getSubscription()).when(subscriptionRepository).save(any(SubscriptionEntity.class));
+        doReturn(user).when(userRepository).save(any(UserEntity.class));
+        UserEntity userEntity = userService.changeSubscription(Subscription.HIGH);
+        assertThat(userEntity.getSubscription()).isEqualTo(user.getSubscription());
+        verify(userRepository, times(1)).findByUsername(any());
+        verify(subscriptionRepository, times(1)).save(any(SubscriptionEntity.class));
+        verify(userRepository, times(1)).save(any(UserEntity.class));
+
     }
 
     @Test
     void renewSubscription() {
+        doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
+        doReturn(user.getSubscription()).when(subscriptionRepository).save(any(SubscriptionEntity.class));
+        doReturn(user).when(userRepository).save(any(UserEntity.class));
+        UserEntity userEntity = userService.changeSubscription(Subscription.HIGH);
+        assertThat(userEntity.getSubscription()).isEqualTo(user.getSubscription());
+        verify(userRepository, times(1)).findByUsername(any());
+        verify(subscriptionRepository, times(1)).save(any(SubscriptionEntity.class));
+        verify(userRepository, times(1)).save(any(UserEntity.class));
+
     }
 
     @Test
@@ -201,11 +219,15 @@ public class UserServiceTest {
         List<CompanyEntity> companyEntities = new ArrayList<>();
         companyEntities.add(company);
         user.setCompanies(companyEntities);
-       doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
+        doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
         doReturn(Optional.of(company)).when(companyRepository).findBySymbol(any());
         doReturn(user).when(userRepository).save(any(UserEntity.class));
         List<CompanyDto> companiesFromUser = userService.deleteOneCompanyFromUser(company.getSymbol());
         assertThat(companiesFromUser.size()).isZero();
+        verify(userRepository, times(1)).findByUsername(any());
+        verify(companyRepository, times(1)).findBySymbol(any());
+        verify(userRepository, times(1)).save(any(UserEntity.class));
+
     }
 
 }
