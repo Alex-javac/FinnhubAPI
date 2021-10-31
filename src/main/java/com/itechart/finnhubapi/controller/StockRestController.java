@@ -38,11 +38,11 @@ public class StockRestController {
         UserEntity user = userService.findByUsername(UserUtil.userName());
         SubscriptionEntity subscription = user.getSubscription();
         FinancialStatementDto finance;
-        if ("HIGH".equals(subscription.getName())&&isCompany(symbol, user)) {
+        if ("HIGH".equals(subscription.getName()) && isCompany(symbol, user)) {
             finance = serviceFeignClient.getFinance(symbol, token);
             return new ResponseEntity<>(finance, HttpStatus.OK);
         } else {
-            finance=new FinancialStatementDto();
+            finance = new FinancialStatementDto();
             return new ResponseEntity<>(finance, HttpStatus.FORBIDDEN);
         }
     }
@@ -53,11 +53,11 @@ public class StockRestController {
         UserEntity user = userService.findByUsername(UserUtil.userName());
         SubscriptionEntity subscription = user.getSubscription();
         MetricDto metric;
-        if (("MEDIUM".equals(subscription.getName()) || "HIGH".equals(subscription.getName()))&&isCompany(symbol, user)) {
+        if (("MEDIUM".equals(subscription.getName()) || "HIGH".equals(subscription.getName())) && isCompany(symbol, user)) {
             metric = serviceFeignClient.getMetric(symbol, token);
             return new ResponseEntity<>(metric, HttpStatus.OK);
         } else {
-            metric=new MetricDto();
+            metric = new MetricDto();
             return new ResponseEntity<>(metric, HttpStatus.FORBIDDEN);
         }
     }
@@ -66,7 +66,7 @@ public class StockRestController {
         List<CompanyEntity> companies = user.getCompanies();
         boolean flag = false;
         for (CompanyEntity company : companies) {
-            if(company.getSymbol().equals(symbol)){
+            if (company.getSymbol().equals(symbol)) {
                 flag = true;
             }
         }

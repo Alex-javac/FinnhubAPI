@@ -8,6 +8,7 @@ import com.itechart.finnhubapi.model.CompanyEntity;
 import com.itechart.finnhubapi.model.QuoteEntity;
 import com.itechart.finnhubapi.repository.CompanyRepository;
 import com.itechart.finnhubapi.repository.QuoteRepository;
+import com.itechart.finnhubapi.service.impl.CompanyServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @TestMethodOrder(MethodOrderer.DisplayName.class)
 @ExtendWith(
@@ -38,7 +43,7 @@ class CompanyServiceTest {
     @Mock
     private ServiceFeignClient serviceFeignClient;
     @InjectMocks
-    private CompanyService companyService;
+    private CompanyServiceImpl companyService;
 
     private final CompanyEntity company = new CompanyEntity();
     private final QuoteEntity quote = new QuoteEntity();
@@ -53,7 +58,6 @@ class CompanyServiceTest {
         company.setCurrency("USD");
         company.setDescription("JOHN WOOD GROUP PLC");
         company.setDisplaySymbol("WDGJF");
-        company.setId(2L);
         quote.setC(3.2);
         quote.setD(0.2199);
         quote.setDp(7.3789);
@@ -132,7 +136,7 @@ class CompanyServiceTest {
     void deleteCompany() {
         doReturn(Optional.of(company)).when(companyRepository).findBySymbol(company.getSymbol());
         doNothing().when(companyRepository).deleteById(anyLong());
-        doReturn(true).when(companyRepository).existsById(anyLong());
+        doReturn(false).when(companyRepository).existsById(anyLong());
         boolean isDeleteCompany = companyService.deleteCompany(company.getSymbol());
         assertThat(isDeleteCompany).isTrue();
         verify(companyRepository, times(1)).findBySymbol(company.getSymbol());

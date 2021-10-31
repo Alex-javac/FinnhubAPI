@@ -12,6 +12,7 @@ import com.itechart.finnhubapi.repository.CompanyRepository;
 import com.itechart.finnhubapi.repository.RoleRepository;
 import com.itechart.finnhubapi.repository.SubscriptionRepository;
 import com.itechart.finnhubapi.repository.UserRepository;
+import com.itechart.finnhubapi.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,12 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 @TestMethodOrder(MethodOrderer.DisplayName.class)
@@ -54,7 +60,7 @@ public class UserServiceTest {
     private JavaMailSender emailSender;
 
     @InjectMocks
-    private UserService userService;
+    private UserServiceImpl userService;
 
     private final UserEntity user = new UserEntity();
     private final SubscriptionEntity subscription = new SubscriptionEntity();
@@ -63,7 +69,6 @@ public class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-
         user.setId(3L);
         user.setEmail("test@gmail.com");
         user.setUsername("testUser");
@@ -91,7 +96,6 @@ public class UserServiceTest {
         company.setDisplaySymbol("WDGJF");
         user.setCompanies(new ArrayList<>());
     }
-
 
     @Test
     void findById() {
@@ -198,7 +202,6 @@ public class UserServiceTest {
         verify(userRepository, times(1)).findByUsername(any());
         verify(subscriptionRepository, times(1)).save(any(SubscriptionEntity.class));
         verify(userRepository, times(1)).save(any(UserEntity.class));
-
     }
 
     @Test
@@ -211,7 +214,6 @@ public class UserServiceTest {
         verify(userRepository, times(1)).findByUsername(any());
         verify(subscriptionRepository, times(1)).save(any(SubscriptionEntity.class));
         verify(userRepository, times(1)).save(any(UserEntity.class));
-
     }
 
     @Test
@@ -227,7 +229,5 @@ public class UserServiceTest {
         verify(userRepository, times(1)).findByUsername(any());
         verify(companyRepository, times(1)).findBySymbol(any());
         verify(userRepository, times(1)).save(any(UserEntity.class));
-
     }
-
 }

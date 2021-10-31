@@ -1,6 +1,5 @@
 package com.itechart.finnhubapi.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.mapper.CompanyMapper;
 import com.itechart.finnhubapi.model.CompanyEntity;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -22,12 +20,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -59,14 +59,6 @@ class CompanyRestControllerTest {
         company.setDisplaySymbol("Test");
     }
 
-    public static String asJsonString(final Object obj) {
-        try {
-            return new ObjectMapper().writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @Test
     void getAllCompanies() throws Exception {
         List<CompanyEntity> companyEntities = new ArrayList<>();
@@ -85,7 +77,7 @@ class CompanyRestControllerTest {
     void getOneCompany() throws Exception {
         CompanyDto companyDto = CompanyMapper.INSTANCE.companyToCompanyDto(company);
         doReturn(companyDto).when(companyService).getBySymbol(anyString());
-        MvcResult result = mvc.perform(get("/api/v1/company/getOneCompany/{symbol}","TSLA"))
+        MvcResult result = mvc.perform(get("/api/v1/company/getOneCompany/{symbol}", "TSLA"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();
@@ -95,14 +87,82 @@ class CompanyRestControllerTest {
     }
 
     @Test
-    void saveCompanyToDB() {
+    void saveCompanyToDB() throws Exception {
+        List<CompanyDto> companyDtos = new ArrayList<>();
+        CompanyDto companyDto = CompanyMapper.INSTANCE.companyToCompanyDto(company);
+        companyDtos.add(companyDto);
+        doReturn(companyDtos).when(companyService).getAllCompanyFromFeign();
+        doReturn(true).when(companyService).save(anyList());
+        MvcResult result = mvc.perform(post("/api/v1/company/saveAllCompanies"))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThat(result.getResponse().getContentAsString()).isNotNull();
+        verify(companyService, times(1)).getAllCompanyFromFeign();
+        verify(companyService, times(1)).save(anyList());
     }
 
     @Test
-    void saveQuoteToDB() {
+    void dontSaveCompanyToDB() throws Exception {
+        List<CompanyDto> companyDtos = new ArrayList<>();
+        CompanyDto companyDto = CompanyMapper.INSTANCE.companyToCompanyDto(company);
+        companyDtos.add(companyDto);
+        doReturn(companyDtos).when(companyService).getAllCompanyFromFeign();
+        doReturn(false).when(companyService).save(anyList());
+        MvcResult result = mvc.perform(post("/api/v1/company/saveAllCompanies"))
+                .andExpect(status().isNotModified())
+                .andReturn();
+        assertThat(result.getResponse().getContentAsString()).isNotNull();
+        verify(companyService, times(1)).getAllCompanyFromFeign();
+        verify(companyService, times(1)).save(anyList());
     }
 
     @Test
-    void deleteCompany() {
+    void saveQuoteToDB() throws Exception {
+        List<CompanyEntity> companyEntityList = new ArrayList<>();
+        companyEntityList.add(company);
+        doReturn(companyEntityList).when(companyService).findAll();
+        doReturn(true).when(companyService).saveQuote(anyList());
+        MvcResult result = mvc.perform(post("/api/v1/company/saveQuotes"))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThat(result.getResponse().getContentAsString()).isNotNull();
+        verify(companyService, times(1)).findAll();
+        verify(companyService, times(1)).saveQuote(anyList());
+
+    }
+
+    @Test
+    void dontSaveQuoteToDB() throws Exception {
+        List<CompanyEntity> companyEntityList = new ArrayList<>();
+        companyEntityList.add(company);
+        doReturn(companyEntityList).when(companyService).findAll();
+        doReturn(false).when(companyService).saveQuote(anyList());
+        MvcResult result = mvc.perform(post("/api/v1/company/saveQuotes"))
+                .andExpect(status().isNotModified())
+                .andReturn();
+        assertThat(result.getResponse().getContentAsString()).isNotNull();
+        verify(companyService, times(1)).findAll();
+        verify(companyService, times(1)).saveQuote(anyList());
+
+    }
+
+    @Test
+    void deleteCompany() throws Exception {
+        doReturn(true).when(companyService).deleteCompany(anyString());
+        MvcResult result = mvc.perform(post("/api/v1/company/deleteCompany/{symbol}", "TSLA"))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThat(result.getResponse().getContentAsString()).isNotNull();
+        verify(companyService, times(1)).deleteCompany(anyString());
+    }
+
+    @Test
+    void dontDeleteCompany() throws Exception {
+        doReturn(false).when(companyService).deleteCompany(anyString());
+        MvcResult result = mvc.perform(post("/api/v1/company/deleteCompany/{symbol}", "TSLA"))
+                .andExpect(status().isNotModified())
+                .andReturn();
+        assertThat(result.getResponse().getContentAsString()).isNotNull();
+        verify(companyService, times(1)).deleteCompany(anyString());
     }
 }

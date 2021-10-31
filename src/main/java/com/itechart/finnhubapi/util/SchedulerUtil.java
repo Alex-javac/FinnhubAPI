@@ -3,7 +3,7 @@ package com.itechart.finnhubapi.util;
 import com.itechart.finnhubapi.model.CompanyEntity;
 import com.itechart.finnhubapi.model.UserEntity;
 import com.itechart.finnhubapi.repository.UserRepository;
-import com.itechart.finnhubapi.service.CompanyService;
+import com.itechart.finnhubapi.service.impl.CompanyServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -18,7 +18,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SchedulerUtil {
-    private final CompanyService companyService;
+    private final CompanyServiceImpl companyService;
     private final UserRepository userRepository;
     private final JavaMailSender emailSender;
 
