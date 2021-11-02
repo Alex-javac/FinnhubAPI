@@ -64,7 +64,7 @@ public class CompanyServiceImpl implements CompanyService {
             quote.setDate(LocalDateTime.now());
             quoteRepository.save(quote);
             try {
-                Thread.sleep(40);
+                Thread.sleep(20);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
