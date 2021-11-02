@@ -101,5 +101,4 @@ class UserRepositoryTest  {
         UserEntity userNull = userRepository.findById(userEntity.getId()).orElse(null);
         assertNull(userNull);
     }
-
 }

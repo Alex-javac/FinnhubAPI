@@ -117,7 +117,6 @@ public class UserServiceTest {
         verify(userRepository, times(1)).deleteById(anyLong());
     }
 
-
     @Test
     void saveUser() {
         doReturn(user).when(userRepository).save(any(UserEntity.class));
@@ -159,7 +158,6 @@ public class UserServiceTest {
         verify(companyRepository, times(1)).findBySymbol(any());
     }
 
-
     @Test
     void lockOrUnlock() {
         doReturn(user).when(userRepository).getById(any());
@@ -170,7 +168,6 @@ public class UserServiceTest {
         verify(userRepository, times(1)).getById(any());
     }
 
-
     @Test
     void findByUsername() {
         doReturn(Optional.of(user)).when(userRepository).findByUsername(user.getUsername());
@@ -178,7 +175,6 @@ public class UserServiceTest {
         assertThat(userEntity).isEqualTo(user);
         verify(userRepository, times(1)).findByUsername(any());
     }
-
 
     @Test
     void getCompaniesFromUser() {
@@ -190,7 +186,6 @@ public class UserServiceTest {
         assertThat(companiesFromUser).isNotNull();
         verify(userRepository, times(1)).findByUsername(user.getUsername());
     }
-
 
     @Test
     void changeSubscription() {

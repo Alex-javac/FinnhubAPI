@@ -41,9 +41,7 @@ class CompanyRestControllerTest {
     private CompanyService companyService;
     @InjectMocks
     private CompanyRestController companyRestController;
-
     protected MockMvc mvc;
-
     private final CompanyEntity company = new CompanyEntity();
 
     @BeforeEach
@@ -70,7 +68,6 @@ class CompanyRestControllerTest {
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isNotNull();
         verify(companyService, times(1)).findAll();
-
     }
 
     @Test
@@ -83,7 +80,6 @@ class CompanyRestControllerTest {
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isNotNull();
         verify(companyService, times(1)).getBySymbol(anyString());
-
     }
 
     @Test
@@ -128,7 +124,6 @@ class CompanyRestControllerTest {
         assertThat(result.getResponse().getContentAsString()).isNotNull();
         verify(companyService, times(1)).findAll();
         verify(companyService, times(1)).saveQuote(anyList());
-
     }
 
     @Test
@@ -143,7 +138,6 @@ class CompanyRestControllerTest {
         assertThat(result.getResponse().getContentAsString()).isNotNull();
         verify(companyService, times(1)).findAll();
         verify(companyService, times(1)).saveQuote(anyList());
-
     }
 
     @Test

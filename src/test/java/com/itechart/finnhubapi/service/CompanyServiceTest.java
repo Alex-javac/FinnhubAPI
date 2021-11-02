@@ -84,7 +84,6 @@ class CompanyServiceTest {
         CompanyDto companyDto = companyService.getBySymbol(company.getSymbol());
         assertThat(companyDto).isExactlyInstanceOf(CompanyDto.class);
         verify(companyRepository, times(1)).findBySymbol(company.getSymbol());
-
     }
 
     @Test
@@ -95,7 +94,6 @@ class CompanyServiceTest {
         boolean save = companyService.save(companyDtos);
         assertThat(save).isTrue();
         verify(companyRepository, times(1)).findBySymbol(company.getSymbol());
-
     }
 
     @Test
@@ -106,7 +104,6 @@ class CompanyServiceTest {
         List<CompanyDto> companyFromFeign = companyService.getAllCompanyFromFeign();
         assertThat(companyFromFeign).isEqualTo(companyDtos);
         verify(serviceFeignClient, times(1)).getCompany(null);
-
     }
 
     @Test
@@ -117,7 +114,6 @@ class CompanyServiceTest {
         List<CompanyEntity> companyEntityList = companyService.findAll();
         assertThat(companyEntityList).isEqualTo(companyEntities);
         verify(companyRepository, times(1)).findAll();
-
     }
 
     @Test
@@ -142,6 +138,5 @@ class CompanyServiceTest {
         verify(companyRepository, times(1)).findBySymbol(company.getSymbol());
         verify(companyRepository, times(1)).deleteById(anyLong());
         verify(companyRepository, times(1)).existsById(anyLong());
-
     }
 }

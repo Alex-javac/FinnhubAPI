@@ -36,7 +36,6 @@ class CompanyRepositoryTest {
         company.setCurrency("USD");
         company.setDescription("JOHN WOOD GROUP PLC");
         company.setDisplaySymbol("Test");
-
     }
 
     @Test
