@@ -63,7 +63,7 @@ public class CompanyRestController {
     @PostMapping(value = "/deleteCompany/{symbol}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity deleteCompany(@PathVariable("symbol") String symbol) {
-        if (!companyService.deleteCompany(symbol)) {
+        if (companyService.deleteCompany(symbol)) {
             return new ResponseEntity(HttpStatus.OK);
         } else {
             return new ResponseEntity(HttpStatus.NOT_MODIFIED);
