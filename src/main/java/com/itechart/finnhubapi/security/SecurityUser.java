@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SecurityUser implements UserDetails {
-
     private final String username;
     private final String password;
     private final List<SimpleGrantedAuthority> authorities;
@@ -24,7 +23,6 @@ public class SecurityUser implements UserDetails {
         this.authorities = authorities;
         this.isActive = isActive;
     }
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

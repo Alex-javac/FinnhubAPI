@@ -55,7 +55,6 @@ public class CompanyServiceImpl implements CompanyService {
         return companyRepository.findAll();
     }
 
-
     public boolean saveQuote(List<CompanyEntity> company) {
         company.forEach(c -> {
             QuoteEntity quote = QuoteMapper.INSTANCE.quoteDtoToQuoteEntity(

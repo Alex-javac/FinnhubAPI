@@ -1,6 +1,5 @@
 package com.itechart.finnhubapi.controller;
 
-
 import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.service.PaypalService;
 import com.itechart.finnhubapi.service.UserService;
@@ -15,8 +14,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-
 
 @Controller
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -54,9 +51,7 @@ public class PaypalController {
                     return "redirect:" + link.getHref();
                 }
             }
-
         } catch (PayPalRESTException e) {
-
             e.printStackTrace();
         }
         return "redirect:/";

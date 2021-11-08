@@ -22,6 +22,6 @@ public class RoleEntity extends BaseEntity {
     private String name;
 
     @JsonBackReference
-    @ManyToMany(mappedBy = "roles",fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
     private List<UserEntity> users;
 }

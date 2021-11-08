@@ -8,7 +8,6 @@ import feign.codec.ErrorDecoder;
 import static feign.FeignException.errorStatus;
 
 public class CustomErrorDecoder implements ErrorDecoder {
-
     @Override
     public Exception decode(String methodKey, Response response) {
         if (response.status() >= 400 && response.status() <= 499) {

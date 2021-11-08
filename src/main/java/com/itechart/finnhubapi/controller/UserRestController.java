@@ -33,7 +33,6 @@ public class UserRestController {
         return new ResponseEntity<>(allUsers, HttpStatus.OK);
     }
 
-
     @GetMapping(value = "/getOneUser/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserEntity> getOneUser(@PathVariable("id") Long id) {
@@ -47,7 +46,6 @@ public class UserRestController {
         UserEntity userById = userService.findByUsername(UserUtil.userName());
         return new ResponseEntity<>(userById, HttpStatus.OK);
     }
-
 
     @PostMapping(value = "/addCompanyToUser")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")

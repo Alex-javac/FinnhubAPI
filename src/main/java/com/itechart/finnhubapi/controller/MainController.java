@@ -71,5 +71,4 @@ public class MainController {
         UserEntity user = userService.renewSubscription(month);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
-
 }

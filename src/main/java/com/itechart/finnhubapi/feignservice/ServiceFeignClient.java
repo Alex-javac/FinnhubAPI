@@ -26,5 +26,4 @@ public interface ServiceFeignClient {
     @GetMapping("/quote?symbol={symbol}&token={token}")
     QuoteDto getQuote(@PathVariable(name = "symbol") String symbol,
                       @PathVariable(name = "token") String token);
-
 }

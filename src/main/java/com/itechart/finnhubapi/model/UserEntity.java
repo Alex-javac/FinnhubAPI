@@ -63,4 +63,3 @@ public class UserEntity extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "company_id", referencedColumnName = "id"))
     private List<CompanyEntity> companies;
 }
-

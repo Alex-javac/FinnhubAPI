@@ -22,11 +22,9 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Object> handleUserNotFoundException(
             UserNotFoundException ex, WebRequest request) {
-
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("message", "User not found");
-
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
@@ -34,19 +32,15 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex, HttpHeaders headers,
             HttpStatus status, WebRequest request) {
-
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDate.now());
         body.put("status", status.value());
-
         List<String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(x -> x.getDefaultMessage())
                 .collect(Collectors.toList());
-
         body.put("errors", errors);
-
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 }
