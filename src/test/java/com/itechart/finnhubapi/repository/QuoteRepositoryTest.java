@@ -61,9 +61,10 @@ class QuoteRepositoryTest {
 
     @Test
     void findAll() {
+       quoteRepository.save(quote);
         List<QuoteEntity> resultList = quoteRepository.findAll();
         assertThat(resultList).isNotNull();
-        assertThat(resultList.size()).isEqualTo(200);
+        assertThat(resultList.size()).isEqualTo(201);
     }
 
     @Test

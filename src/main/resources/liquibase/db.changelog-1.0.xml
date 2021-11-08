@@ -227,4 +227,8 @@
                                  referencedTableName="company"/>
     </changeSet>
 
+    <changeSet id="1.0.11" author="alexander.alekseyuk">
+        <sqlFile path="classpath:liquibase/insert.sql"/>
+    </changeSet>
+
 </databaseChangeLog>
