@@ -1,6 +1,5 @@
 package com.itechart.finnhubapi.service;
 
-
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.mapper.UserMapper;
 import com.itechart.finnhubapi.model.CompanyEntity;
@@ -39,13 +38,11 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-
 @TestMethodOrder(MethodOrderer.DisplayName.class)
 @ExtendWith(
         MockitoExtension.class
 )
 public class UserServiceTest {
-
     @Mock
     private UserRepository userRepository;
     @Mock

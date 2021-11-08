@@ -1,6 +1,8 @@
 package com.itechart.finnhubapi.service.impl;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
+import com.itechart.finnhubapi.exceptions.CompanyNotFoundException;
+import com.itechart.finnhubapi.exceptions.NoDataFoundException;
 import com.itechart.finnhubapi.feignservice.ServiceFeignClient;
 import com.itechart.finnhubapi.mapper.CompanyMapper;
 import com.itechart.finnhubapi.mapper.QuoteMapper;
@@ -28,12 +30,12 @@ public class CompanyServiceImpl implements CompanyService {
 
     public CompanyEntity getEntityBySymbol(String symbol) {
         return companyRepository.findBySymbol(symbol).orElseThrow(
-                () -> new RuntimeException(String.format("company named %s was not found", symbol)));
+                () -> new CompanyNotFoundException(symbol));
     }
 
     public CompanyDto getBySymbol(String symbol) {
         CompanyEntity bySymbol = companyRepository.findBySymbol(symbol).orElseThrow(
-                () -> new RuntimeException(String.format("company named %s was not found", symbol)));
+                () -> new CompanyNotFoundException(symbol));
         return CompanyMapper.INSTANCE.companyToCompanyDto(bySymbol);
     }
 
@@ -52,7 +54,11 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     public List<CompanyEntity> findAll() {
-        return companyRepository.findAll();
+        List<CompanyEntity> companyEntities = companyRepository.findAll();
+        if (companyEntities.isEmpty()) {
+            throw new NoDataFoundException();
+        }
+        return companyEntities;
     }
 
     public boolean saveQuote(List<CompanyEntity> company) {
@@ -72,8 +78,7 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     public boolean deleteCompany(String symbol) {
-        CompanyEntity company = companyRepository.findBySymbol(symbol).orElseThrow(
-                () -> new RuntimeException(String.format("company named %s was not found", symbol)));
+        CompanyEntity company = getEntityBySymbol(symbol);
         Long id = company.getId();
         companyRepository.deleteById(id);
         return !companyRepository.existsById(id);

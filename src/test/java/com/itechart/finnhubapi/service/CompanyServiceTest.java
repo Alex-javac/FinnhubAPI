@@ -75,7 +75,6 @@ class CompanyServiceTest {
         CompanyEntity companyEntity = companyService.getEntityBySymbol(company.getSymbol());
         assertThat(companyEntity).isEqualTo(company);
         verify(companyRepository, times(1)).findBySymbol(company.getSymbol());
-
     }
 
     @Test

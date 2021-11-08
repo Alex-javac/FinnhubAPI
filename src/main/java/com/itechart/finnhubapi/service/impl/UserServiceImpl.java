@@ -2,6 +2,8 @@ package com.itechart.finnhubapi.service.impl;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.UserDto;
+import com.itechart.finnhubapi.exceptions.CompanyNotFoundException;
+import com.itechart.finnhubapi.exceptions.NoDataFoundException;
 import com.itechart.finnhubapi.exceptions.UserNotFoundException;
 import com.itechart.finnhubapi.mapper.CompanyMapper;
 import com.itechart.finnhubapi.mapper.UserMapper;
@@ -20,7 +22,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -97,14 +98,18 @@ public class UserServiceImpl implements UserService {
     }
 
     public List<UserEntity> findAll() {
-        return userRepository.findAll();
+        List<UserEntity> users = userRepository.findAll();
+        if (users.isEmpty()) {
+            throw new NoDataFoundException();
+        }
+        return users;
     }
 
     public UserEntity addCompany(String symbol) {
         UserEntity user = findByUsername(UserUtil.userName());
         SubscriptionEntity subscription = user.getSubscription();
         CompanyEntity company = companyRepository.findBySymbol(symbol).orElseThrow(
-                () -> new RuntimeException(String.format("company named %s was not found", symbol)));
+                () -> new CompanyNotFoundException(symbol));
         List<CompanyEntity> companies = user.getCompanies();
         if ("LOW".equals(subscription.getName())) {
             if (companies.size() >= 2) {
@@ -151,7 +156,7 @@ public class UserServiceImpl implements UserService {
 
     public UserEntity findByUsername(String userName) {
         return userRepository.findByUsername(userName).orElseThrow(() ->
-                new UsernameNotFoundException("User doesn't exists"));
+                new UserNotFoundException(userName));
     }
 
     public UserEntity changeSubscription(Subscription subscription) {
@@ -184,7 +189,7 @@ public class UserServiceImpl implements UserService {
         UserEntity user = findByUsername(UserUtil.userName());
         List<CompanyEntity> companies = user.getCompanies();
         CompanyEntity company = companyRepository.findBySymbol(symbol).orElseThrow(
-                () -> new RuntimeException(String.format("company named %s was not found", symbol)));
+                () -> new CompanyNotFoundException(symbol));
         companies.remove(company);
         user.setCompanies(companies);
         UserEntity userEntity = userRepository.save(user);

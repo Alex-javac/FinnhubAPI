@@ -61,7 +61,7 @@ class QuoteRepositoryTest {
 
     @Test
     void findAll() {
-       quoteRepository.save(quote);
+        quoteRepository.save(quote);
         List<QuoteEntity> resultList = quoteRepository.findAll();
         assertThat(resultList).isNotNull();
         assertThat(resultList.size()).isEqualTo(201);
@@ -78,7 +78,6 @@ class QuoteRepositoryTest {
             assertEquals(savedCompany, entity.getCompany());
         });
     }
-
 
     @Test
     void deleteById() {

@@ -39,7 +39,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @TestMethodOrder(MethodOrderer.DisplayName.class)
 @ExtendWith(
         MockitoExtension.class
@@ -55,7 +54,6 @@ class MainControllerTest {
     private final UserEntity user = new UserEntity();
     private final SubscriptionEntity subscription = new SubscriptionEntity();
     private final RoleEntity role = new RoleEntity();
-
 
     @BeforeEach
     void setUp() {
