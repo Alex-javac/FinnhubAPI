@@ -2,7 +2,9 @@ package com.itechart.finnhubapi.service.impl;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.UserDto;
+import com.itechart.finnhubapi.exceptions.CompanyAlreadyOnListException;
 import com.itechart.finnhubapi.exceptions.CompanyNotFoundException;
+import com.itechart.finnhubapi.exceptions.EmailOrLoginInDataBaseException;
 import com.itechart.finnhubapi.exceptions.NoDataFoundException;
 import com.itechart.finnhubapi.exceptions.UserNotFoundException;
 import com.itechart.finnhubapi.mapper.CompanyMapper;
@@ -45,10 +47,14 @@ public class UserServiceImpl implements UserService {
     }
 
     public void deleteById(long id) {
+        findById(id);
         userRepository.deleteById(id);
     }
 
     public UserEntity saveUser(UserDto user) {
+        if (isEmailOrLoginInDataBase(user.getEmail(), user.getUsername())) {
+            throw new EmailOrLoginInDataBaseException(user.getEmail(), user.getUsername());
+        }
         UserEntity userEntity = UserMapper.INSTANCE.userDtoToUserEntity(user);
         SubscriptionEntity subscription = new SubscriptionEntity();
         subscription.setName(Subscription.LOW.toString());
@@ -107,6 +113,9 @@ public class UserServiceImpl implements UserService {
 
     public UserEntity addCompany(String symbol) {
         UserEntity user = findByUsername(UserUtil.userName());
+        if (isCompany(symbol, user)) {
+            throw new CompanyAlreadyOnListException(symbol);
+        }
         SubscriptionEntity subscription = user.getSubscription();
         CompanyEntity company = companyRepository.findBySymbol(symbol).orElseThrow(
                 () -> new CompanyNotFoundException(symbol));
@@ -127,7 +136,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserEntity lockOrUnlock(Long id, String status) {
-        UserEntity user = userRepository.getById(id);
+        UserEntity user = findById(id);
         user.setStatus(status);
         UserEntity userEntity = userRepository.save(user);
         if (status.equals("ACTIVE")) {
@@ -197,5 +206,26 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(CompanyMapper.INSTANCE::companyToCompanyDto)
                 .collect(Collectors.toList());
+    }
+
+    private boolean isCompany(String symbol, UserEntity user) {
+        List<CompanyEntity> companies = user.getCompanies();
+        boolean flag = false;
+        for (CompanyEntity company : companies) {
+            if (company.getSymbol().equals(symbol)) {
+                flag = true;
+            }
+        }
+        return flag;
+    }
+
+    private boolean isEmailOrLoginInDataBase(String email, String login) {
+        UserEntity userEntityByEmail = userRepository.findByEmail(email).orElse(null);
+        UserEntity userEntityByLogin = userRepository.findByUsername(login).orElse(null);
+        if (userEntityByLogin == null || userEntityByEmail == null) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

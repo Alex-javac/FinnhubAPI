@@ -103,15 +103,19 @@ public class UserServiceTest {
 
     @Test
     void throwExceptionIfDatabaseIsNotAvailable() {
+        doReturn(Optional.of(user)).when(userRepository).findById(anyLong());
         doThrow(RuntimeException.class).when(userRepository).deleteById(user.getId());
         assertThrows(RuntimeException.class, () -> userService.deleteById(user.getId()));
+        verify(userRepository,times(1)).findById(anyLong());
     }
 
     @Test
     void deleteById() {
+        doReturn(Optional.of(user)).when(userRepository).findById(anyLong());
         doNothing().when(userRepository).deleteById(user.getId());
         userService.deleteById(user.getId());
         verify(userRepository, times(1)).deleteById(anyLong());
+        verify(userRepository,times(1)).findById(anyLong());
     }
 
     @Test
@@ -157,12 +161,12 @@ public class UserServiceTest {
 
     @Test
     void lockOrUnlock() {
-        doReturn(user).when(userRepository).getById(any());
+        doReturn(Optional.of(user)).when(userRepository).findById(anyLong());
         doReturn(user).when(userRepository).save(any(UserEntity.class));
         UserEntity userEntity = userService.lockOrUnlock(user.getId(), "BLOCKED");
         assertThat(userEntity).isEqualTo(user);
         verify(userRepository, times(1)).save(any(UserEntity.class));
-        verify(userRepository, times(1)).getById(any());
+        verify(userRepository,times(1)).findById(anyLong());
     }
 
     @Test

@@ -28,6 +28,6 @@ public class SubscriptionEntity extends BaseEntity {
     private LocalDateTime finishTime;
 
     @JsonBackReference
-    @OneToMany(mappedBy = "subscription", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "subscription", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserEntity> users;
 }

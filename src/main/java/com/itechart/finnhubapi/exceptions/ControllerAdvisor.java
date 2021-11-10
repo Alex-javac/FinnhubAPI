@@ -24,7 +24,7 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
             UserNotFoundException ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
-        body.put("message", "User not found");
+        body.put("message", ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
@@ -33,7 +33,7 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
             NoDataFoundException ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
-        body.put("message", "No users found");
+        body.put("message", ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
@@ -42,7 +42,25 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
             CompanyNotFoundException ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
-        body.put("message", "Company not found");
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(EmailOrLoginInDataBaseException.class)
+    public ResponseEntity<Object> handleCompanyAlreadyOnList(
+            EmailOrLoginInDataBaseException ex, WebRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(CompanyAlreadyOnListException.class)
+    public ResponseEntity<Object> handleCompanyAlreadyOnList(
+            CompanyAlreadyOnListException ex, WebRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
