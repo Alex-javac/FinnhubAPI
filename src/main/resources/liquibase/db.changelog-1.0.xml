@@ -58,11 +58,9 @@
             </column>
 
             <column name="start_time" type="TIMESTAMP" defaultValue="CURRENT_TIMESTAMP()">
-                <constraints nullable="false"/>
             </column>
 
             <column name="finish_time" type="TIMESTAMP" defaultValue="CURRENT_TIMESTAMP()">
-                <constraints nullable="false"/>
             </column>
 
         </createTable>
@@ -98,7 +96,6 @@
             </column>
         </createTable>
     </changeSet>
-
 
 
     <changeSet id="1.0.5" author="alexander.alekseyuk">
@@ -227,8 +224,8 @@
                                  referencedTableName="company"/>
     </changeSet>
 
-<!--    <changeSet id="1.0.11" author="alexander.alekseyuk">-->
-<!--        <sqlFile path="classpath:liquibase/insert.sql"/>-->
-<!--    </changeSet>-->
+    <changeSet id="1.0.11" author="alexander.alekseyuk">
+        <sqlFile path="classpath:liquibase/insert.sql"/>
+    </changeSet>
 
 </databaseChangeLog>

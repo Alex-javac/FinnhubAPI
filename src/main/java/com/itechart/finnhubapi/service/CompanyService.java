@@ -1,11 +1,15 @@
 package com.itechart.finnhubapi.service;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
+import com.itechart.finnhubapi.dto.QuoteDto;
 import com.itechart.finnhubapi.model.CompanyEntity;
+import com.itechart.finnhubapi.model.QuoteEntity;
 
 import java.util.List;
 
 public interface CompanyService {
+
+    List<QuoteDto> getQuote(String symbol);
 
     CompanyEntity getEntityBySymbol(String symbol);
 
@@ -17,7 +21,7 @@ public interface CompanyService {
 
     List<CompanyEntity> findAll();
 
-    boolean saveQuote(List<CompanyEntity> company);
+    boolean saveQuote();
 
     boolean deleteCompany(String symbol);
 }

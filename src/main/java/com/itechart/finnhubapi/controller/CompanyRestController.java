@@ -1,6 +1,8 @@
 package com.itechart.finnhubapi.controller;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
+import com.itechart.finnhubapi.dto.CompanyDtoRequest;
+import com.itechart.finnhubapi.dto.QuoteDto;
 import com.itechart.finnhubapi.model.CompanyEntity;
 import com.itechart.finnhubapi.service.CompanyService;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,13 @@ public class CompanyRestController {
         return new ResponseEntity<>(companyDto, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/getQuote/{symbol}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<List<QuoteDto>> getQuote(@PathVariable("symbol") String symbol) {
+       List<QuoteDto> quoteDto = companyService.getQuote(symbol);
+        return new ResponseEntity<>(quoteDto, HttpStatus.OK);
+    }
+
     @PostMapping(value = "/saveAllCompanies")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity saveCompanyToDB() {
@@ -52,8 +61,7 @@ public class CompanyRestController {
     @PostMapping(value = "/saveQuotes")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity saveQuoteToDB() {
-        List<CompanyEntity> company = companyService.findAll();
-        if (companyService.saveQuote(company)) {
+        if (companyService.saveQuote()) {
             return new ResponseEntity(HttpStatus.OK);
         } else {
             return new ResponseEntity(HttpStatus.NOT_MODIFIED);
@@ -62,8 +70,8 @@ public class CompanyRestController {
 
     @PostMapping(value = "/deleteCompany/{symbol}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity deleteCompany(@PathVariable("symbol") String symbol) {
-        if (companyService.deleteCompany(symbol)) {
+    public ResponseEntity deleteCompany(@PathVariable("symbol") CompanyDtoRequest companyDtoRequest) {
+        if (companyService.deleteCompany(companyDtoRequest.getSymbol())) {
             return new ResponseEntity(HttpStatus.OK);
         } else {
             return new ResponseEntity(HttpStatus.NOT_MODIFIED);

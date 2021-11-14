@@ -2,6 +2,7 @@ package com.itechart.finnhubapi.service;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.UserDto;
+import com.itechart.finnhubapi.dto.UserDtoResponse;
 import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.model.UserEntity;
 
@@ -12,9 +13,9 @@ public interface UserService {
 
     void deleteById(long id);
 
-    UserEntity saveUser(UserDto user);
+    UserDtoResponse saveUser(UserDto user);
 
-    UserEntity updateUser(UserDto user);
+    UserDtoResponse updateUser(UserDto user);
 
     List<UserEntity> findAll();
 

@@ -1,6 +1,7 @@
 package com.itechart.finnhubapi.controller;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
+import com.itechart.finnhubapi.dto.CompanyDtoRequest;
 import com.itechart.finnhubapi.model.UserEntity;
 import com.itechart.finnhubapi.service.UserService;
 import com.itechart.finnhubapi.util.UserUtil;
@@ -49,8 +50,8 @@ public class UserRestController {
 
     @PostMapping(value = "/addCompanyToUser")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<UserEntity> addCompanyToUser(@RequestBody String symbol) {
-        UserEntity userEntity = userService.addCompany(symbol);
+    public ResponseEntity<UserEntity> addCompanyToUser(@RequestBody CompanyDtoRequest symbol) {
+        UserEntity userEntity = userService.addCompany(symbol.getSymbol());
         return new ResponseEntity<>(userEntity, HttpStatus.OK);
     }
 
@@ -63,8 +64,8 @@ public class UserRestController {
 
     @PostMapping(value = "/deleteOneCompanyFromUser")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<List<CompanyDto>> deleteOneCompanyFromUser(@RequestBody String symbol) {
-        List<CompanyDto> companiesFromUser = userService.deleteOneCompanyFromUser(symbol);
+    public ResponseEntity<List<CompanyDto>> deleteOneCompanyFromUser(@RequestBody CompanyDtoRequest symbol) {
+        List<CompanyDto> companiesFromUser = userService.deleteOneCompanyFromUser(symbol.getSymbol());
         return new ResponseEntity<>(companiesFromUser, HttpStatus.OK);
     }
 }

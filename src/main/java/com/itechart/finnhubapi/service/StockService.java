@@ -28,7 +28,7 @@ public class StockService {
         UserEntity user = userService.findByUsername(UserUtil.userName());
         SubscriptionEntity subscription = user.getSubscription();
         FinancialStatementDto finance;
-        if ("HIGH".equals(subscription.getName()) && isCompany(symbol, user)) {
+        if ("HIGH".equals(subscription.getName()) && UserUtil.isCompany(symbol, user)) {
             finance = serviceFeignClient.getFinance(symbol, token);
             return new ResponseEntity<>(finance, HttpStatus.OK);
         } else {
@@ -41,23 +41,12 @@ public class StockService {
         UserEntity user = userService.findByUsername(UserUtil.userName());
         SubscriptionEntity subscription = user.getSubscription();
         MetricDto metric;
-        if (("MEDIUM".equals(subscription.getName()) || "HIGH".equals(subscription.getName())) && isCompany(symbol, user)) {
+        if (("MEDIUM".equals(subscription.getName()) || "HIGH".equals(subscription.getName())) && UserUtil.isCompany(symbol, user)) {
             metric = serviceFeignClient.getMetric(symbol, token);
             return new ResponseEntity<>(metric, HttpStatus.OK);
         } else {
             metric = new MetricDto();
             return new ResponseEntity<>(metric, HttpStatus.FORBIDDEN);
         }
-    }
-
-    private boolean isCompany(String symbol, UserEntity user) {
-        List<CompanyEntity> companies = user.getCompanies();
-        boolean flag = false;
-        for (CompanyEntity company : companies) {
-            if (company.getSymbol().equals(symbol)) {
-                flag = true;
-            }
-        }
-        return flag;
     }
 }

@@ -115,17 +115,17 @@ class CompanyServiceTest {
         verify(companyRepository, times(1)).findAll();
     }
 
-    @Test
-    void saveQuote() {
-        List<CompanyEntity> companyEntities = new ArrayList<>();
-        companyEntities.add(company);
-        doReturn(QuoteMapper.INSTANCE.quoteToQuoteDto(quote)).when(serviceFeignClient).getQuote(company.getSymbol(), null);
-        doReturn(quote).when(quoteRepository).save(any(QuoteEntity.class));
-        boolean saveQuote = companyService.saveQuote(companyEntities);
-        assertThat(saveQuote).isTrue();
-        verify(serviceFeignClient, times(1)).getQuote(company.getSymbol(), null);
-        verify(quoteRepository, times(1)).save(any(QuoteEntity.class));
-    }
+//    @Test
+//    void saveQuote() {
+//        List<CompanyEntity> companyEntities = new ArrayList<>();
+//        companyEntities.add(company);
+//        doReturn(QuoteMapper.INSTANCE.quoteToQuoteDto(quote)).when(serviceFeignClient).getQuote(company.getSymbol(), null);
+//        doReturn(quote).when(quoteRepository).save(any(QuoteEntity.class));
+//        boolean saveQuote = companyService.saveQuote(companyEntities);
+//        assertThat(saveQuote).isTrue();
+//        verify(serviceFeignClient, times(1)).getQuote(company.getSymbol(), null);
+//        verify(quoteRepository, times(1)).save(any(QuoteEntity.class));
+//    }
 
     @Test
     void deleteCompany() {

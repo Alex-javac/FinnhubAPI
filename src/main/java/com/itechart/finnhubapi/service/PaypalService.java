@@ -1,6 +1,11 @@
 package com.itechart.finnhubapi.service;
 
+import com.itechart.finnhubapi.dto.SubscriptionNameDto;
+import com.itechart.finnhubapi.exceptions.PayPalException;
+import com.itechart.finnhubapi.exceptions.SubscriptionPaidException;
 import com.itechart.finnhubapi.model.Subscription;
+import com.itechart.finnhubapi.model.UserEntity;
+import com.itechart.finnhubapi.util.UserUtil;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payer;
@@ -12,6 +17,7 @@ import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,86 +31,78 @@ public class PaypalService {
     private final APIContext apiContext;
     private final UserService userService;
 
-    public static final String SUCCESS_URL = "pay/success";
-    public static final String CANCEL_URL = "pay/cancel";
+    @Value("${paypal.success.url}")
+    private String successUrl;
+    @Value("${paypal.cancel.url}")
+    private String cancelUrl;
+    @Value("${paypal.currency}")
+    private String currency;
+    @Value("${paypal.method}")
+    private String method;
+    @Value("${paypal.intent}")
+    private String intent;
 
-    public String getPaymentResult(String subscription) {
+    public String paymentForSubscription(SubscriptionNameDto subscription) {
         double price;
-        switch (subscription) {
+        switch (subscription.getName().toString()) {
             case "LOW" -> price = 10.00;
             case "MEDIUM" -> price = 20.00;
             case "HIGH" -> price = 30.00;
             default -> price = 0.00;
         }
-        try {
-            Payment payment = createPayment(price, "USD", "paypal",
-                    "sale", "payment description", "http://localhost:8080/" + CANCEL_URL,
-                    "http://localhost:8080/" + SUCCESS_URL);
+        UserEntity user = userService.findByUsername(UserUtil.userName());
+        if (!user.getSubscription().getName().equals(subscription.getName().toString())) {
+            Payment payment = createPayment(price, subscription.getName());
             for (Links link : payment.getLinks()) {
-                if (link.getRel().equals("approval_url")) {
-                    userService.changeSubscription(Subscription.valueOf(subscription));
-                    return "redirect:" + link.getHref();
-                }
+                if (link.getRel().equals("approval_url")) return link.getHref();
             }
-        } catch (PayPalRESTException e) {
-            e.printStackTrace();
+        } else {
+            throw new SubscriptionPaidException(user.getSubscription().getName());
         }
-        return "redirect:/";
+        return null;
     }
 
-    public String getSuccessPayResult(String paymentId, String payerId) {
+    private Payment createPayment(Double total, Subscription description) {
         try {
-            Payment payment = executePayment(paymentId, payerId);
-            System.out.println(payment.toJSON());
-            if (payment.getState().equals("approved")) {
-                return "success";
-            }
+            Amount amount = new Amount();
+            amount.setCurrency(currency);
+            total = new BigDecimal(total).setScale(2, RoundingMode.HALF_UP).doubleValue();
+            amount.setTotal(String.valueOf(total));
+
+            Transaction transaction = new Transaction();
+            transaction.setDescription(description.toString());
+            transaction.setAmount(amount);
+
+            List<Transaction> transactions = new ArrayList<>();
+            transactions.add(transaction);
+
+            Payer payer = new Payer();
+            payer.setPaymentMethod(method);
+
+            Payment payment = new Payment();
+            payment.setIntent(intent);
+            payment.setPayer(payer);
+            payment.setTransactions(transactions);
+            RedirectUrls redirectUrls = new RedirectUrls();
+            redirectUrls.setCancelUrl(cancelUrl);
+            redirectUrls.setReturnUrl(successUrl + description);
+            payment.setRedirectUrls(redirectUrls);
+
+            return payment.create(apiContext);
         } catch (PayPalRESTException e) {
-            System.out.println(e.getMessage());
+            throw new PayPalException("PayPal isn't working");
         }
-        return "redirect:/";
     }
 
-    private Payment createPayment(
-            Double total,
-            String currency,
-            String method,
-            String intent,
-            String description,
-            String cancelUrl,
-            String successUrl) throws PayPalRESTException {
-        Amount amount = new Amount();
-        amount.setCurrency(currency);
-        total = new BigDecimal(total).setScale(2, RoundingMode.HALF_UP).doubleValue();
-        amount.setTotal(String.valueOf(total));
-
-        Transaction transaction = new Transaction();
-        transaction.setDescription(description);
-        transaction.setAmount(amount);
-
-        List transactions = new ArrayList<>();
-        transactions.add(transaction);
-
-        Payer payer = new Payer();
-        payer.setPaymentMethod(method.toString());
-
-        Payment payment = new Payment();
-        payment.setIntent(intent.toString());
-        payment.setPayer(payer);
-        payment.setTransactions(transactions);
-        RedirectUrls redirectUrls = new RedirectUrls();
-        redirectUrls.setCancelUrl(cancelUrl);
-        redirectUrls.setReturnUrl(successUrl);
-        payment.setRedirectUrls(redirectUrls);
-
-        return payment.create(apiContext);
-    }
-
-    private Payment executePayment(String paymentId, String payerId) throws PayPalRESTException {
-        Payment payment = new Payment();
-        payment.setId(paymentId);
-        PaymentExecution paymentExecute = new PaymentExecution();
-        paymentExecute.setPayerId(payerId);
-        return payment.execute(apiContext, paymentExecute);
+    public Payment executePayment(String paymentId, String payerId) {
+        try {
+            Payment payment = new Payment();
+            payment.setId(paymentId);
+            PaymentExecution paymentExecute = new PaymentExecution();
+            paymentExecute.setPayerId(payerId);
+            return payment.execute(apiContext, paymentExecute);
+        } catch (PayPalRESTException e) {
+            throw new PayPalException("PayPal isn't working");
+        }
     }
 }

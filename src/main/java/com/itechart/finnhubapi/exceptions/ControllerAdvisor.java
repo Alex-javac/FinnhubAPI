@@ -47,7 +47,7 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(EmailOrLoginInDataBaseException.class)
-    public ResponseEntity<Object> handleCompanyAlreadyOnList(
+    public ResponseEntity<Object> handleEmailOrLoginInDataBase(
             EmailOrLoginInDataBaseException ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
@@ -58,6 +58,33 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
     @ExceptionHandler(CompanyAlreadyOnListException.class)
     public ResponseEntity<Object> handleCompanyAlreadyOnList(
             CompanyAlreadyOnListException ex, WebRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(SubscriptionPaidException.class)
+    public ResponseEntity<Object> handleSubscriptionPaid(
+            SubscriptionPaidException ex, WebRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(PayPalException.class)
+    public ResponseEntity<Object> handlePayPalException(
+            PayPalException ex, WebRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(CompanyIsNotOnListException.class)
+    public ResponseEntity<Object> handleCompanyIsNotOnListException(
+            CompanyIsNotOnListException ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("message", ex.getMessage());

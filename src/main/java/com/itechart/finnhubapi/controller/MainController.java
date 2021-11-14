@@ -1,6 +1,8 @@
 package com.itechart.finnhubapi.controller;
 
+import com.itechart.finnhubapi.dto.SubscriptionNameDto;
 import com.itechart.finnhubapi.dto.UserDto;
+import com.itechart.finnhubapi.dto.UserDtoResponse;
 import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.model.UserEntity;
 import com.itechart.finnhubapi.service.UserService;
@@ -25,15 +27,15 @@ public class MainController {
     private final UserService userService;
 
     @PostMapping(value = "/registration")
-    public ResponseEntity<UserEntity> registration(@RequestBody UserDto userDto) {
-        UserEntity saveUser = userService.saveUser(userDto);
+    public ResponseEntity<UserDtoResponse> registration(@RequestBody UserDto userDto) {
+        UserDtoResponse saveUser = userService.saveUser(userDto);
         return new ResponseEntity<>(saveUser, HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/updateUser")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<UserEntity> updateUser(@RequestBody UserDto userDto) {
-        UserEntity updateUser = userService.updateUser(userDto);
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER', 'ROLE_USER_INACTIVE')")
+    public ResponseEntity<UserDtoResponse> updateUser(@RequestBody UserDto userDto) {
+        UserDtoResponse updateUser = userService.updateUser(userDto);
         return new ResponseEntity<>(updateUser, HttpStatus.OK);
     }
 
@@ -60,8 +62,8 @@ public class MainController {
 
     @PostMapping(value = "/changeSubscription")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserEntity> changeSubscription(@RequestBody Subscription subscription) {
-        UserEntity user = userService.changeSubscription(subscription);
+    public ResponseEntity<UserEntity> changeSubscription(@RequestBody SubscriptionNameDto subscription) {
+        UserEntity user = userService.changeSubscription(subscription.getName());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 

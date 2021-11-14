@@ -111,33 +111,33 @@ class CompanyRestControllerTest {
         verify(companyService, times(1)).save(anyList());
     }
 
-    @Test
-    void saveQuoteToDB() throws Exception {
-        List<CompanyEntity> companyEntityList = new ArrayList<>();
-        companyEntityList.add(company);
-        doReturn(companyEntityList).when(companyService).findAll();
-        doReturn(true).when(companyService).saveQuote(anyList());
-        MvcResult result = mvc.perform(post("/api/v1/company/saveQuotes"))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertThat(result.getResponse().getContentAsString()).isNotNull();
-        verify(companyService, times(1)).findAll();
-        verify(companyService, times(1)).saveQuote(anyList());
-    }
+//    @Test
+//    void saveQuoteToDB() throws Exception {
+//        List<CompanyEntity> companyEntityList = new ArrayList<>();
+//        companyEntityList.add(company);
+//        doReturn(companyEntityList).when(companyService).findAll();
+//        doReturn(true).when(companyService).saveQuote(anyList());
+//        MvcResult result = mvc.perform(post("/api/v1/company/saveQuotes"))
+//                .andExpect(status().isOk())
+//                .andReturn();
+//        assertThat(result.getResponse().getContentAsString()).isNotNull();
+//        verify(companyService, times(1)).findAll();
+//        verify(companyService, times(1)).saveQuote(anyList());
+//    }
 
-    @Test
-    void dontSaveQuoteToDB() throws Exception {
-        List<CompanyEntity> companyEntityList = new ArrayList<>();
-        companyEntityList.add(company);
-        doReturn(companyEntityList).when(companyService).findAll();
-        doReturn(false).when(companyService).saveQuote(anyList());
-        MvcResult result = mvc.perform(post("/api/v1/company/saveQuotes"))
-                .andExpect(status().isNotModified())
-                .andReturn();
-        assertThat(result.getResponse().getContentAsString()).isNotNull();
-        verify(companyService, times(1)).findAll();
-        verify(companyService, times(1)).saveQuote(anyList());
-    }
+//    @Test
+//    void dontSaveQuoteToDB() throws Exception {
+//        List<CompanyEntity> companyEntityList = new ArrayList<>();
+//        companyEntityList.add(company);
+//        doReturn(companyEntityList).when(companyService).findAll();
+//        doReturn(false).when(companyService).saveQuote(anyList());
+//        MvcResult result = mvc.perform(post("/api/v1/company/saveQuotes"))
+//                .andExpect(status().isNotModified())
+//                .andReturn();
+//        assertThat(result.getResponse().getContentAsString()).isNotNull();
+//        verify(companyService, times(1)).findAll();
+//        verify(companyService, times(1)).saveQuote(anyList());
+//    }
 
     @Test
     void deleteCompany() throws Exception {

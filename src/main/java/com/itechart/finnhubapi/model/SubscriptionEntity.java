@@ -5,14 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
@@ -28,6 +25,6 @@ public class SubscriptionEntity extends BaseEntity {
     private LocalDateTime finishTime;
 
     @JsonBackReference
-    @OneToMany(mappedBy = "subscription", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserEntity> users;
+    @OneToOne(mappedBy = "subscription")
+    private UserEntity user;
 }
