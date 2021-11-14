@@ -1,6 +1,8 @@
 package com.itechart.finnhubapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itechart.finnhubapi.dto.MonthDto;
+import com.itechart.finnhubapi.dto.SubscriptionNameDto;
 import com.itechart.finnhubapi.dto.UserDto;
 import com.itechart.finnhubapi.mapper.UserMapper;
 import com.itechart.finnhubapi.model.RoleEntity;
@@ -34,7 +36,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -44,7 +45,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         MockitoExtension.class
 )
 class MainControllerTest {
-
     @Mock
     private UserService userService;
     @InjectMocks
@@ -87,7 +87,7 @@ class MainControllerTest {
 
     @Test
     void registration() throws Exception {
-        doReturn(user).when(userService).saveUser(any(UserDto.class));
+        doReturn(UserMapper.INSTANCE.userToUserDtoResponse(user)).when(userService).saveUser(any(UserDto.class));
         UserDto userDto = UserMapper.INSTANCE.userToUserDto(user);
         MvcResult result = mvc.perform(post("/api/v1/registration")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -101,7 +101,7 @@ class MainControllerTest {
 
     @Test
     void updateUser() throws Exception {
-        doReturn(user).when(userService).updateUser(any(UserDto.class));
+        doReturn(UserMapper.INSTANCE.userToUserDtoResponse(user)).when(userService).updateUser(any(UserDto.class));
         UserDto userDto = UserMapper.INSTANCE.userToUserDto(user);
         MvcResult result = mvc.perform(post("/api/v1/updateUser")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -116,7 +116,7 @@ class MainControllerTest {
     @Test
     void locking() throws Exception {
         doReturn(user).when(userService).lockOrUnlock(anyLong(), anyString());
-        MvcResult result = mvc.perform(get("/api/v1/lockingUser/{id}", 1L))
+        MvcResult result = mvc.perform(post("/api/v1/lockingUser/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();
@@ -127,7 +127,7 @@ class MainControllerTest {
     @Test
     void unlocking() throws Exception {
         doReturn(user).when(userService).lockOrUnlock(anyLong(), anyString());
-        MvcResult result = mvc.perform(get("/api/v1/unlockingUser/{id}", 1L))
+        MvcResult result = mvc.perform(post("/api/v1/unlockingUser/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();
@@ -138,7 +138,7 @@ class MainControllerTest {
     @Test
     void delete() throws Exception {
         doNothing().when(userService).deleteById(anyLong());
-        MvcResult result = mvc.perform(get("/api/v1/deleteUser/{id}", 1L))
+        MvcResult result = mvc.perform(post("/api/v1/deleteUser/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();
@@ -148,10 +148,12 @@ class MainControllerTest {
 
     @Test
     void changeSubscription() throws Exception {
+        SubscriptionNameDto subscriptionNameDto = new SubscriptionNameDto();
+        subscriptionNameDto.setName(Subscription.LOW);
         doReturn(user).when(userService).changeSubscription(any(Subscription.class));
         MvcResult result = mvc.perform(post("/api/v1/changeSubscription")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(Subscription.LOW)))
+                        .content(asJsonString(subscriptionNameDto)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();
@@ -161,10 +163,12 @@ class MainControllerTest {
 
     @Test
     void renewSubscription() throws Exception {
+        MonthDto month = new MonthDto();
+        month.setMonth(3L);
         doReturn(user).when(userService).renewSubscription(anyLong());
         MvcResult result = mvc.perform(post("/api/v1/renewSubscription")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(1L)))
+                        .content(asJsonString(month)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();

@@ -1,6 +1,7 @@
 package com.itechart.finnhubapi.service;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
+import com.itechart.finnhubapi.feignservice.MicroserviceFeignClient;
 import com.itechart.finnhubapi.feignservice.ServiceFeignClient;
 import com.itechart.finnhubapi.mapper.CompanyMapper;
 import com.itechart.finnhubapi.mapper.QuoteMapper;
@@ -25,6 +26,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -42,6 +44,8 @@ class CompanyServiceTest {
     private QuoteRepository quoteRepository;
     @Mock
     private ServiceFeignClient serviceFeignClient;
+    @Mock
+    private MicroserviceFeignClient microserviceFeignClient;
     @InjectMocks
     private CompanyServiceImpl companyService;
 
@@ -115,22 +119,19 @@ class CompanyServiceTest {
         verify(companyRepository, times(1)).findAll();
     }
 
-//    @Test
-//    void saveQuote() {
-//        List<CompanyEntity> companyEntities = new ArrayList<>();
-//        companyEntities.add(company);
-//        doReturn(QuoteMapper.INSTANCE.quoteToQuoteDto(quote)).when(serviceFeignClient).getQuote(company.getSymbol(), null);
-//        doReturn(quote).when(quoteRepository).save(any(QuoteEntity.class));
-//        boolean saveQuote = companyService.saveQuote(companyEntities);
-//        assertThat(saveQuote).isTrue();
-//        verify(serviceFeignClient, times(1)).getQuote(company.getSymbol(), null);
-//        verify(quoteRepository, times(1)).save(any(QuoteEntity.class));
-//    }
+    @Test
+    void saveQuote() {
+        doNothing().when(microserviceFeignClient).saveQuote();
+        boolean saveQuote = companyService.saveQuote();
+        assertThat(saveQuote).isTrue();
+        verify(microserviceFeignClient, times(1)).saveQuote();
+    }
 
     @Test
     void deleteCompany() {
         doReturn(Optional.of(company)).when(companyRepository).findBySymbol(company.getSymbol());
         doNothing().when(companyRepository).deleteById(anyLong());
+        doNothing().when(microserviceFeignClient).deleteCompany(anyString());
         doReturn(false).when(companyRepository).existsById(anyLong());
         boolean isDeleteCompany = companyService.deleteCompany(company.getSymbol());
         assertThat(isDeleteCompany).isTrue();

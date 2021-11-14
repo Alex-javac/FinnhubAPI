@@ -50,7 +50,7 @@ class CompanyRepositoryTest {
 
     @Test
     void findAll() {
-        final int COMPANIES_COUNT_IN_DATABASE = 200;
+        final int COMPANIES_COUNT_IN_DATABASE = 98;
         List<CompanyEntity> resultList = companyRepository.findAll();
         assertThat(resultList).isNotNull();
         assertThat(resultList.size()).isEqualTo(COMPANIES_COUNT_IN_DATABASE);

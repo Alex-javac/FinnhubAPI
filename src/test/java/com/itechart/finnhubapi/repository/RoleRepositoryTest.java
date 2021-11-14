@@ -40,7 +40,7 @@ class RoleRepositoryTest {
 
     @Test
     void findAll() {
-        final int ROLES_COUNT_IN_DATABASE = 2;
+        final int ROLES_COUNT_IN_DATABASE = 3;
         List<RoleEntity> resultList = roleRepository.findAll();
         assertThat(resultList).isNotNull();
         assertThat(resultList.size()).isEqualTo(ROLES_COUNT_IN_DATABASE);

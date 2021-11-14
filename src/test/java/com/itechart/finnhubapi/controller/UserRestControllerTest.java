@@ -1,6 +1,8 @@
 package com.itechart.finnhubapi.controller;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
+import com.itechart.finnhubapi.dto.CompanyDtoRequest;
+import com.itechart.finnhubapi.mapper.CompanyMapper;
 import com.itechart.finnhubapi.model.RoleEntity;
 import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.model.SubscriptionEntity;
@@ -118,10 +120,11 @@ class UserRestControllerTest {
 
     @Test
     void addCompanyToUser() throws Exception {
+        CompanyDtoRequest companyDtoRequest = CompanyMapper.INSTANCE.companyToCompanyDtoRequest(CompanyMapper.INSTANCE.companyDtoToCompanyEntity(company));
         doReturn(user).when(userService).addCompany(anyString());
         MvcResult result = mvc.perform(post("/api/v1/user/addCompanyToUser")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString("TSLA")))
+                        .content(asJsonString(companyDtoRequest)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();
@@ -146,10 +149,11 @@ class UserRestControllerTest {
     void deleteOneCompanyFromUser() throws Exception {
         List<CompanyDto> companyDtos = new ArrayList<>();
         companyDtos.add(company);
+        CompanyDtoRequest companyDtoRequest = CompanyMapper.INSTANCE.companyToCompanyDtoRequest(CompanyMapper.INSTANCE.companyDtoToCompanyEntity(company));
         doReturn(companyDtos).when(userService).deleteOneCompanyFromUser(anyString());
         MvcResult result = mvc.perform(post("/api/v1/user/deleteOneCompanyFromUser")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString("TSLA")))
+                        .content(asJsonString(companyDtoRequest)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();

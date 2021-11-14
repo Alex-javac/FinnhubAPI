@@ -2,6 +2,8 @@ package com.itechart.finnhubapi.controller;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.CompanyDtoRequest;
+import com.itechart.finnhubapi.dto.UserDtoResponse;
+import com.itechart.finnhubapi.mapper.UserMapper;
 import com.itechart.finnhubapi.model.UserEntity;
 import com.itechart.finnhubapi.service.UserService;
 import com.itechart.finnhubapi.util.UserUtil;
@@ -43,8 +45,8 @@ public class UserRestController {
 
     @GetMapping(value = "/getOneUser")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<UserEntity> getOneUser() {
-        UserEntity userById = userService.findByUsername(UserUtil.userName());
+    public ResponseEntity<UserDtoResponse> getOneUser() {
+        UserDtoResponse userById = UserMapper.INSTANCE.userToUserDtoResponse(userService.findByUsername(UserUtil.userName()));
         return new ResponseEntity<>(userById, HttpStatus.OK);
     }
 

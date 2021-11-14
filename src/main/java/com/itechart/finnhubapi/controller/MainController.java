@@ -1,9 +1,9 @@
 package com.itechart.finnhubapi.controller;
 
+import com.itechart.finnhubapi.dto.MonthDto;
 import com.itechart.finnhubapi.dto.SubscriptionNameDto;
 import com.itechart.finnhubapi.dto.UserDto;
 import com.itechart.finnhubapi.dto.UserDtoResponse;
-import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.model.UserEntity;
 import com.itechart.finnhubapi.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,21 +38,21 @@ public class MainController {
         return new ResponseEntity<>(updateUser, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/lockingUser/{id}")
+    @PostMapping(value = "/lockingUser/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserEntity> locking(@PathVariable("id") Long id) {
         UserEntity blockedUser = userService.lockOrUnlock(id, "BLOCKED");
         return new ResponseEntity<>(blockedUser, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/unlockingUser/{id}")
+    @PostMapping(value = "/unlockingUser/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserEntity> unlocking(@PathVariable("id") Long id) {
         UserEntity activeUser = userService.lockOrUnlock(id, "ACTIVE");
         return new ResponseEntity<>(activeUser, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/deleteUser/{id}")
+    @PostMapping(value = "/deleteUser/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> delete(@PathVariable("id") Long id) {
         userService.deleteById(id);
@@ -69,8 +68,8 @@ public class MainController {
 
     @PostMapping(value = "/renewSubscription")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserEntity> renewSubscription(@RequestBody long month) {
-        UserEntity user = userService.renewSubscription(month);
+    public ResponseEntity<UserEntity> renewSubscription(@RequestBody MonthDto month) {
+        UserEntity user = userService.renewSubscription(month.getMonth());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 }

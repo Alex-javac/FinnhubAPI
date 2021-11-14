@@ -11,11 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -43,38 +39,38 @@ public class CompanyRestController {
     @GetMapping(value = "/getQuote/{symbol}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<List<QuoteDto>> getQuote(@PathVariable("symbol") String symbol) {
-       List<QuoteDto> quoteDto = companyService.getQuote(symbol);
+        List<QuoteDto> quoteDto = companyService.getQuote(symbol);
         return new ResponseEntity<>(quoteDto, HttpStatus.OK);
     }
 
     @PostMapping(value = "/saveAllCompanies")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity saveCompanyToDB() {
+    public ResponseEntity<String> saveCompanyToDB() {
         List<CompanyDto> companyFromFeign = companyService.getAllCompanyFromFeign();
         if (companyService.save(companyFromFeign)) {
-            return new ResponseEntity(HttpStatus.OK);
+            return new ResponseEntity("successful save Companies",HttpStatus.OK);
         } else {
-            return new ResponseEntity(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity("an error occurred during saving",HttpStatus.NOT_MODIFIED);
         }
     }
 
     @PostMapping(value = "/saveQuotes")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity saveQuoteToDB() {
+    public ResponseEntity<String> saveQuoteToDB() {
         if (companyService.saveQuote()) {
-            return new ResponseEntity(HttpStatus.OK);
+            return new ResponseEntity("successful save Quotes", HttpStatus.OK);
         } else {
-            return new ResponseEntity(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity("an error occurred during saving", HttpStatus.NOT_MODIFIED);
         }
     }
 
-    @PostMapping(value = "/deleteCompany/{symbol}")
+    @PostMapping(value = "/deleteCompany")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity deleteCompany(@PathVariable("symbol") CompanyDtoRequest companyDtoRequest) {
+    public ResponseEntity<String> deleteCompany(@RequestBody CompanyDtoRequest companyDtoRequest) {
         if (companyService.deleteCompany(companyDtoRequest.getSymbol())) {
-            return new ResponseEntity(HttpStatus.OK);
+            return new ResponseEntity("successful delete", HttpStatus.OK);
         } else {
-            return new ResponseEntity(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity("there was an error during deletion", HttpStatus.NOT_MODIFIED);
         }
     }
 }
