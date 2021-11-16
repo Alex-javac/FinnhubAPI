@@ -44,10 +44,10 @@ public class PaypalService {
 
     public String paymentForSubscription(SubscriptionNameDto subscription) {
         double price;
-        switch (subscription.getName().toString()) {
-            case "LOW" -> price = 10.00;
-            case "MEDIUM" -> price = 20.00;
-            case "HIGH" -> price = 30.00;
+        switch (subscription.getName()) {
+            case LOW -> price = 10.00;
+            case MEDIUM -> price = 20.00;
+            case HIGH -> price = 30.00;
             default -> price = 0.00;
         }
         UserEntity user = userService.findByUsername(UserUtil.userName());

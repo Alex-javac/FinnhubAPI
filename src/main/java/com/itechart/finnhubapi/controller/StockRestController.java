@@ -5,6 +5,7 @@ import com.itechart.finnhubapi.dto.metricdto.MetricDto;
 import com.itechart.finnhubapi.service.StockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,12 +24,14 @@ public class StockRestController {
     @GetMapping("/financials/{symbol}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<FinancialStatementDto> financials(@PathVariable("symbol") String symbol) {
-        return stockService.getFinancialResponseEntity(symbol);
+        FinancialStatementDto finance = stockService.getFinancialResponseEntity(symbol);
+        return new ResponseEntity<>(finance, HttpStatus.OK);
     }
 
     @GetMapping("/metric/{symbol}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<MetricDto> metric(@PathVariable("symbol") String symbol) {
-        return stockService.getMetricResponseEntity(symbol);
+        MetricDto metricDto = stockService.getMetricResponseEntity(symbol);
+        return new ResponseEntity<>(metricDto, HttpStatus.OK);
     }
 }

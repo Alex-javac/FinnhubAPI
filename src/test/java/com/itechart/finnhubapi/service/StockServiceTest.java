@@ -3,6 +3,8 @@ package com.itechart.finnhubapi.service;
 import com.itechart.finnhubapi.dto.financialdto.FinancialStatementDto;
 import com.itechart.finnhubapi.dto.metricdto.MetricDetailsDto;
 import com.itechart.finnhubapi.dto.metricdto.MetricDto;
+import com.itechart.finnhubapi.exceptions.FinancialException;
+import com.itechart.finnhubapi.exceptions.MetricException;
 import com.itechart.finnhubapi.feignservice.ServiceFeignClient;
 import com.itechart.finnhubapi.model.CompanyEntity;
 import com.itechart.finnhubapi.model.RoleEntity;
@@ -17,14 +19,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
@@ -88,8 +89,8 @@ class StockServiceTest {
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);
         doReturn(user).when(userService).findByUsername(null);
-        ResponseEntity<FinancialStatementDto> response = stockService.getFinancialResponseEntity("WDGJF");
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThrows(FinancialException.class,
+                () -> stockService.getFinancialResponseEntity("WDGJF"));
         verify(userService, times(1)).findByUsername(null);
     }
 
@@ -101,8 +102,8 @@ class StockServiceTest {
         user.setSubscription(subscription);
         doReturn(user).when(userService).findByUsername(null);
         doReturn(finance).when(serviceFeignClient).getFinance(anyString(), eq(null));
-        ResponseEntity<FinancialStatementDto> response = stockService.getFinancialResponseEntity("WDGJF");
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        FinancialStatementDto response = stockService.getFinancialResponseEntity("WDGJF");
+        assertThat(response).isNotNull();
         verify(userService, times(1)).findByUsername(null);
         verify(serviceFeignClient, times(1)).getFinance(anyString(), eq(null));
     }
@@ -114,8 +115,8 @@ class StockServiceTest {
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);
         doReturn(user).when(userService).findByUsername(null);
-        ResponseEntity<MetricDto> response = stockService.getMetricResponseEntity("WDGJF");
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThrows(MetricException.class,
+                () -> stockService.getMetricResponseEntity("WDGJF"));
         verify(userService, times(1)).findByUsername(null);
     }
 
@@ -127,8 +128,8 @@ class StockServiceTest {
         user.setSubscription(subscription);
         doReturn(user).when(userService).findByUsername(null);
         doReturn(metric).when(serviceFeignClient).getMetric(anyString(), eq(null));
-        ResponseEntity<MetricDto> response = stockService.getMetricResponseEntity("WDGJF");
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        MetricDto response = stockService.getMetricResponseEntity("WDGJF");
+        assertThat(response).isNotNull();
         verify(userService, times(1)).findByUsername(null);
         verify(serviceFeignClient, times(1)).getMetric(anyString(), eq(null));
     }

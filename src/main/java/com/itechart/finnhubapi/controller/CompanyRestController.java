@@ -47,30 +47,26 @@ public class CompanyRestController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> saveCompanyToDB() {
         List<CompanyDto> companyFromFeign = companyService.getAllCompanyFromFeign();
-        if (companyService.save(companyFromFeign)) {
-            return new ResponseEntity("successful save Companies",HttpStatus.OK);
-        } else {
-            return new ResponseEntity("an error occurred during saving",HttpStatus.NOT_MODIFIED);
-        }
+        return (companyService.save(companyFromFeign)) ?
+                new ResponseEntity<>("successful save Companies", HttpStatus.OK) :
+                new ResponseEntity<>("an error occurred during saving", HttpStatus.NOT_MODIFIED);
+
     }
 
     @PostMapping(value = "/saveQuotes")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> saveQuoteToDB() {
-        if (companyService.saveQuote()) {
-            return new ResponseEntity("successful save Quotes", HttpStatus.OK);
-        } else {
-            return new ResponseEntity("an error occurred during saving", HttpStatus.NOT_MODIFIED);
-        }
+        return (companyService.saveQuote()) ?
+                new ResponseEntity<>("successful save Quotes", HttpStatus.OK) :
+                new ResponseEntity<>("an error occurred during saving", HttpStatus.NOT_MODIFIED);
     }
 
     @PostMapping(value = "/deleteCompany")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> deleteCompany(@RequestBody CompanyDtoRequest companyDtoRequest) {
-        if (companyService.deleteCompany(companyDtoRequest.getSymbol())) {
-            return new ResponseEntity("successful delete", HttpStatus.OK);
-        } else {
-            return new ResponseEntity("there was an error during deletion", HttpStatus.NOT_MODIFIED);
-        }
+        return (companyService.deleteCompany(companyDtoRequest.getSymbol())) ?
+                new ResponseEntity<>("successful delete", HttpStatus.OK) :
+                new ResponseEntity<>("there was an error during deletion", HttpStatus.NOT_MODIFIED);
+
     }
 }

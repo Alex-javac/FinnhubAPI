@@ -52,8 +52,8 @@ public class UserRestController {
 
     @PostMapping(value = "/addCompanyToUser")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<UserEntity> addCompanyToUser(@RequestBody CompanyDtoRequest symbol) {
-        UserEntity userEntity = userService.addCompany(symbol.getSymbol());
+    public ResponseEntity<UserDtoResponse> addCompanyToUser(@RequestBody CompanyDtoRequest symbol) {
+        UserDtoResponse userEntity =UserMapper.INSTANCE.userToUserDtoResponse(userService.addCompany(symbol.getSymbol()));
         return new ResponseEntity<>(userEntity, HttpStatus.OK);
     }
 

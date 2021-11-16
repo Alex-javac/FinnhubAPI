@@ -3,15 +3,13 @@ package com.itechart.finnhubapi.service.impl;
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.UserDto;
 import com.itechart.finnhubapi.dto.UserDtoResponse;
-import com.itechart.finnhubapi.exceptions.CompanyAlreadyOnListException;
-import com.itechart.finnhubapi.exceptions.CompanyNotFoundException;
-import com.itechart.finnhubapi.exceptions.EmailOrLoginInDataBaseException;
-import com.itechart.finnhubapi.exceptions.NoDataFoundException;
-import com.itechart.finnhubapi.exceptions.UserNotFoundException;
+import com.itechart.finnhubapi.exceptions.*;
 import com.itechart.finnhubapi.mapper.CompanyMapper;
 import com.itechart.finnhubapi.mapper.UserMapper;
 import com.itechart.finnhubapi.model.CompanyEntity;
+import com.itechart.finnhubapi.model.Role;
 import com.itechart.finnhubapi.model.RoleEntity;
+import com.itechart.finnhubapi.model.Status;
 import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.model.SubscriptionEntity;
 import com.itechart.finnhubapi.model.UserEntity;
@@ -61,10 +59,10 @@ public class UserServiceImpl implements UserService {
         subscription.setName(Subscription.INACTIVE.toString());
         SubscriptionEntity saveSubscription = subscriptionRepository.save(subscription);
         userEntity.setSubscription(saveSubscription);
-        RoleEntity role = roleRepository.findByName("ROLE_USER_INACTIVE");
+        RoleEntity role = roleRepository.findByName(Role.ROLE_USER_INACTIVE.toString());
         List<RoleEntity> userRoles = new ArrayList<>();
         userRoles.add(role);
-        userEntity.setStatus("ACTIVE");
+        userEntity.setStatus(Status.ACTIVE.toString());
         userEntity.setRoles(userRoles);
         userEntity.setCreated(LocalDateTime.now());
         userEntity.setUpdated(LocalDateTime.now());
@@ -77,7 +75,7 @@ public class UserServiceImpl implements UserService {
                 "You have successfully registered on the FinnhubAPI \n" +
                 "Your login: " + user.getUsername() + "\n" +
                 "Your password: " + user.getPassword() + "\n" +
-                "to activate the subscription, follow the link: "+"http://localhost:8080/api/v1/subscription/payment");
+                "to activate the subscription, follow the link: " + "http://localhost:8080/api/v1/subscription/payment");
         emailSender.send(message);
         return savedUser;
     }
@@ -120,12 +118,13 @@ public class UserServiceImpl implements UserService {
         CompanyEntity company = companyRepository.findBySymbol(symbol).orElseThrow(
                 () -> new CompanyNotFoundException(symbol));
         List<CompanyEntity> companies = user.getCompanies();
-        if ("LOW".equals(subscription.getName())) {
+        if (Subscription.LOW.toString().equals(subscription.getName())) {
             if (companies.size() >= 2) {
                 companies.remove(0);
             }
             companies.add(company);
-        } else if ("MEDIUM".equals(subscription.getName()) || "HIGH".equals(subscription.getName())) {
+        } else if (Subscription.MEDIUM.toString().equals(subscription.getName()) ||
+                Subscription.HIGH.toString().equals(subscription.getName())) {
             if (companies.size() >= 3) {
                 companies.remove(0);
             }
@@ -139,7 +138,7 @@ public class UserServiceImpl implements UserService {
         UserEntity user = findById(id);
         user.setStatus(status);
         UserEntity userEntity = userRepository.save(user);
-        if (status.equals("ACTIVE")) {
+        if (status.equals(Status.ACTIVE.toString())) {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(userEntity.getEmail());
             message.setSubject("FinnhubAPI");
@@ -157,6 +156,9 @@ public class UserServiceImpl implements UserService {
 
     public List<CompanyDto> getCompaniesFromUser(String username) {
         List<CompanyEntity> companies = findByUsername(username).getCompanies();
+        if (companies.isEmpty()) {
+            throw new EmptyListCompanyException();
+        }
         return companies
                 .stream()
                 .map(CompanyMapper.INSTANCE::companyToCompanyDto)
@@ -171,8 +173,8 @@ public class UserServiceImpl implements UserService {
     public UserEntity changeSubscription(Subscription subscription) {
         UserEntity user = findByUsername(UserUtil.userName());
         SubscriptionEntity subscriptionEntity = user.getSubscription();
-        if(subscription.equals(Subscription.INACTIVE)){
-            RoleEntity role = roleRepository.findByName("ROLE_USER_INACTIVE");
+        if (subscription.equals(Subscription.INACTIVE)) {
+            RoleEntity role = roleRepository.findByName(Role.ROLE_USER_INACTIVE.toString());
             List<RoleEntity> userRoles = new ArrayList<>();
             userRoles.add(role);
             user.setRoles(userRoles);
@@ -181,11 +183,13 @@ public class UserServiceImpl implements UserService {
             subscriptionEntity.setFinishTime(null);
             SubscriptionEntity saveSubscription = subscriptionRepository.save(subscriptionEntity);
             user.setSubscription(saveSubscription);
-        }else {
-            RoleEntity role = roleRepository.findByName("ROLE_USER");
-            List<RoleEntity> userRoles = new ArrayList<>();
-            userRoles.add(role);
-            user.setRoles(userRoles);
+        } else {
+            if (!user.getRoles().get(0).getName().equals(Role.ROLE_ADMIN.toString())) {
+                RoleEntity role = roleRepository.findByName(Role.ROLE_USER.toString());
+                List<RoleEntity> userRoles = new ArrayList<>();
+                userRoles.add(role);
+                user.setRoles(userRoles);
+            }
             subscriptionEntity.setName(subscription.toString());
             subscriptionEntity.setStartTime(LocalDateTime.now());
             subscriptionEntity.setFinishTime(LocalDateTime.now().plusMonths(3));
@@ -215,7 +219,11 @@ public class UserServiceImpl implements UserService {
         List<CompanyEntity> companies = user.getCompanies();
         CompanyEntity company = companyRepository.findBySymbol(symbol).orElseThrow(
                 () -> new CompanyNotFoundException(symbol));
-        companies.remove(company);
+        if (companies.contains(company)) {
+            companies.remove(company);
+        }else {
+            throw new CompanyIsNotOnListException(symbol);
+        }
         user.setCompanies(companies);
         UserEntity userEntity = userRepository.save(user);
         return userEntity.getCompanies()
