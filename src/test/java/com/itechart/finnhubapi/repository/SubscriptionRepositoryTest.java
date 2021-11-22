@@ -46,7 +46,7 @@ class SubscriptionRepositoryTest {
 
     @Test
     void findAll() {
-        final int SUBSCRIPTION_COUNT_IN_DATABASE = 4;
+        final int SUBSCRIPTION_COUNT_IN_DATABASE = 5;
         List<SubscriptionEntity> resultList = subscriptionRepository.findAll();
         assertThat(resultList).isNotNull();
         assertThat(resultList.size()).isEqualTo(SUBSCRIPTION_COUNT_IN_DATABASE);

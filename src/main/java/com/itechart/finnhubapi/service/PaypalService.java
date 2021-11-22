@@ -100,6 +100,7 @@ public class PaypalService {
             payment.setId(paymentId);
             PaymentExecution paymentExecute = new PaymentExecution();
             paymentExecute.setPayerId(payerId);
+            apiContext.setMaskRequestId(true);
             return payment.execute(apiContext, paymentExecute);
         } catch (PayPalRESTException e) {
             throw new PayPalException("PayPal isn't working");

@@ -235,10 +235,6 @@ public class UserServiceImpl implements UserService {
     private boolean isEmailOrLoginInDataBase(String email, String login) {
         UserEntity userEntityByEmail = userRepository.findByEmail(email).orElse(null);
         UserEntity userEntityByLogin = userRepository.findByUsername(login).orElse(null);
-        if (userEntityByLogin == null || userEntityByEmail == null) {
-            return false;
-        } else {
-            return true;
-        }
+        return userEntityByLogin != null && userEntityByEmail != null;
     }
 }

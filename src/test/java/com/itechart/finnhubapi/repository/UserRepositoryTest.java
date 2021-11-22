@@ -88,7 +88,7 @@ class UserRepositoryTest {
 
     @Test
     void findAll() {
-        final int USERS_COUNT_IN_DATABASE = 4;
+        final int USERS_COUNT_IN_DATABASE = 5;
         List<UserEntity> resultList = userRepository.findAll();
         assertThat(resultList).isNotNull();
         assertThat(resultList.size()).isEqualTo(USERS_COUNT_IN_DATABASE);

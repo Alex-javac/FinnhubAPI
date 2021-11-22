@@ -4,7 +4,6 @@ import com.itechart.finnhubapi.dto.SubscriptionNameDto;
 import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.service.PaypalService;
 import com.itechart.finnhubapi.service.UserService;
-import com.paypal.base.rest.PayPalRESTException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,7 +31,7 @@ public class SubscriptionController {
     }
 
     @GetMapping("/success/{subscription}")
-    public ResponseEntity<String> successPayment(@PathVariable("subscription") String subscription, HttpServletRequest request) throws PayPalRESTException {
+    public ResponseEntity<String> successPayment(@PathVariable("subscription") String subscription, HttpServletRequest request){
         paypalService.executePayment(request.getParameter("paymentId"), request.getParameter("PayerID"));
         userService.changeSubscription(Subscription.valueOf(subscription.toUpperCase()));
         return new ResponseEntity<>("Payment was successful", HttpStatus.OK);
