@@ -1,20 +1,13 @@
 package com.itechart.finnhubapi.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.itechart.finnhubapi.model.CompanyEntity;
-import com.itechart.finnhubapi.model.RoleEntity;
-import com.itechart.finnhubapi.model.SubscriptionEntity;
+import com.itechart.finnhubapi.model.entity.CompanyEntity;
+import com.itechart.finnhubapi.model.entity.RoleEntity;
+import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import java.util.List;
 
 @Data

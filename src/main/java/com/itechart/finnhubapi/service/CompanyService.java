@@ -2,7 +2,7 @@ package com.itechart.finnhubapi.service;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.QuoteDto;
-import com.itechart.finnhubapi.model.CompanyEntity;
+import com.itechart.finnhubapi.model.entity.CompanyEntity;
 
 import java.util.List;
 

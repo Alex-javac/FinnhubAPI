@@ -3,16 +3,17 @@ package com.itechart.finnhubapi.service.impl;
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.UserDto;
 import com.itechart.finnhubapi.dto.UserDtoResponse;
+import com.itechart.finnhubapi.dto.UserUpdateDto;
 import com.itechart.finnhubapi.exceptions.*;
 import com.itechart.finnhubapi.mapper.CompanyMapper;
 import com.itechart.finnhubapi.mapper.UserMapper;
-import com.itechart.finnhubapi.model.CompanyEntity;
+import com.itechart.finnhubapi.model.entity.CompanyEntity;
 import com.itechart.finnhubapi.model.Role;
-import com.itechart.finnhubapi.model.RoleEntity;
+import com.itechart.finnhubapi.model.entity.RoleEntity;
 import com.itechart.finnhubapi.model.Status;
 import com.itechart.finnhubapi.model.Subscription;
-import com.itechart.finnhubapi.model.SubscriptionEntity;
-import com.itechart.finnhubapi.model.UserEntity;
+import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
+import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.repository.CompanyRepository;
 import com.itechart.finnhubapi.repository.RoleRepository;
 import com.itechart.finnhubapi.repository.SubscriptionRepository;
@@ -50,6 +51,16 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 
+    public UserEntity findByLoginAndPassword(String userName, String password) {
+        UserEntity userEntity = findByUsername(userName);
+        if (userEntity != null) {
+            if (passwordEncoder.matches(password, userEntity.getPassword())) {
+                return userEntity;
+            }
+        }
+        return null;
+    }
+
     public UserDtoResponse saveUser(UserDto user) {
         if (isEmailOrLoginInDataBase(user.getEmail(), user.getUsername())) {
             throw new EmailOrLoginInDataBaseException(user.getEmail(), user.getUsername());
@@ -80,7 +91,7 @@ public class UserServiceImpl implements UserService {
         return savedUser;
     }
 
-    public UserDtoResponse updateUser(UserDto user) {
+    public UserDtoResponse updateUser(UserUpdateDto user) {
         UserEntity userEntity = findByUsername(UserUtil.userName());
         if (user.getFirstName() != null) {
             userEntity.setFirstName(user.getFirstName());

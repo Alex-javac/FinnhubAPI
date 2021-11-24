@@ -1,11 +1,9 @@
 package com.itechart.finnhubapi.controller;
 
-import com.itechart.finnhubapi.dto.MonthDto;
-import com.itechart.finnhubapi.dto.SubscriptionNameDto;
-import com.itechart.finnhubapi.dto.UserDto;
-import com.itechart.finnhubapi.dto.UserDtoResponse;
+import com.itechart.finnhubapi.dto.*;
 import com.itechart.finnhubapi.model.Status;
-import com.itechart.finnhubapi.model.UserEntity;
+import com.itechart.finnhubapi.model.entity.UserEntity;
+import com.itechart.finnhubapi.security.JwtProvider;
 import com.itechart.finnhubapi.service.SubscriptionService;
 import com.itechart.finnhubapi.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.Map;
 
 @RestController
@@ -29,16 +28,24 @@ public class MainController {
 
     private final UserService userService;
     private final SubscriptionService subscriptionService;
+    private final JwtProvider jwtProvider;
 
     @PostMapping(value = "/registration")
-    public ResponseEntity<UserDtoResponse> registration(@RequestBody UserDto userDto) {
+    public ResponseEntity<UserDtoResponse> registration(@RequestBody @Valid UserDto userDto) {
         UserDtoResponse saveUser = userService.saveUser(userDto);
         return new ResponseEntity<>(saveUser, HttpStatus.CREATED);
     }
 
+    @PostMapping("/auth")
+    public ResponseEntity<AuthResponse> auth(@RequestBody AuthRequest request) {
+        UserEntity userEntity = userService.findByLoginAndPassword(request.getLogin(), request.getPassword());
+        String token = jwtProvider.generateToken(userEntity.getEmail());
+        return new ResponseEntity<>(new AuthResponse(token), HttpStatus.OK);
+    }
+
     @PostMapping(value = "/updateUser")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER', 'ROLE_USER_INACTIVE')")
-    public ResponseEntity<UserDtoResponse> updateUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<UserDtoResponse> updateUser(@RequestBody @Valid UserUpdateDto userDto) {
         UserDtoResponse updateUser = userService.updateUser(userDto);
         return new ResponseEntity<>(updateUser, HttpStatus.OK);
     }

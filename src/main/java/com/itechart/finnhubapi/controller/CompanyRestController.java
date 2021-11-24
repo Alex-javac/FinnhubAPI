@@ -3,7 +3,7 @@ package com.itechart.finnhubapi.controller;
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.CompanyDtoRequest;
 import com.itechart.finnhubapi.dto.QuoteDto;
-import com.itechart.finnhubapi.model.CompanyEntity;
+import com.itechart.finnhubapi.model.entity.CompanyEntity;
 import com.itechart.finnhubapi.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

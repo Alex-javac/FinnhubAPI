@@ -4,7 +4,7 @@ import com.itechart.finnhubapi.dto.SubscriptionNameDto;
 import com.itechart.finnhubapi.exceptions.PayPalException;
 import com.itechart.finnhubapi.exceptions.SubscriptionPaidException;
 import com.itechart.finnhubapi.model.Subscription;
-import com.itechart.finnhubapi.model.UserEntity;
+import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.util.UserUtil;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Links;

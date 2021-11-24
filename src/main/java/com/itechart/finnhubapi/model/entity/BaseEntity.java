@@ -1,4 +1,4 @@
-package com.itechart.finnhubapi.model;
+package com.itechart.finnhubapi.model.entity;
 
 import lombok.Getter;
 import lombok.Setter;

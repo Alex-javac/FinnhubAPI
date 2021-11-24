@@ -1,6 +1,9 @@
 package com.itechart.finnhubapi.service.impl;
 
 import com.itechart.finnhubapi.model.*;
+import com.itechart.finnhubapi.model.entity.RoleEntity;
+import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
+import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.repository.RoleRepository;
 import com.itechart.finnhubapi.repository.UserRepository;
 import com.itechart.finnhubapi.service.SubscriptionService;

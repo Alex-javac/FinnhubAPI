@@ -4,11 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itechart.finnhubapi.dto.MonthDto;
 import com.itechart.finnhubapi.dto.SubscriptionNameDto;
 import com.itechart.finnhubapi.dto.UserDto;
+import com.itechart.finnhubapi.dto.UserUpdateDto;
 import com.itechart.finnhubapi.mapper.UserMapper;
-import com.itechart.finnhubapi.model.RoleEntity;
+import com.itechart.finnhubapi.model.entity.RoleEntity;
 import com.itechart.finnhubapi.model.Subscription;
-import com.itechart.finnhubapi.model.SubscriptionEntity;
-import com.itechart.finnhubapi.model.UserEntity;
+import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
+import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -101,7 +102,7 @@ class MainControllerTest {
 
     @Test
     void updateUser() throws Exception {
-        doReturn(UserMapper.INSTANCE.userToUserDtoResponse(user)).when(userService).updateUser(any(UserDto.class));
+        doReturn(UserMapper.INSTANCE.userToUserDtoResponse(user)).when(userService).updateUser(any(UserUpdateDto.class));
         UserDto userDto = UserMapper.INSTANCE.userToUserDto(user);
         MvcResult result = mvc.perform(post("/api/v1/updateUser")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -110,7 +111,7 @@ class MainControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isNotNull();
-        verify(userService, times(1)).updateUser(any(UserDto.class));
+        verify(userService, times(1)).updateUser(any(UserUpdateDto.class));
     }
 
     @Test

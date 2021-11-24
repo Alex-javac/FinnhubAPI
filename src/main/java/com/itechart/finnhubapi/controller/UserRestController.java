@@ -4,7 +4,7 @@ import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.CompanyDtoRequest;
 import com.itechart.finnhubapi.dto.UserDtoResponse;
 import com.itechart.finnhubapi.mapper.UserMapper;
-import com.itechart.finnhubapi.model.UserEntity;
+import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.service.UserService;
 import com.itechart.finnhubapi.util.UserUtil;
 import lombok.RequiredArgsConstructor;

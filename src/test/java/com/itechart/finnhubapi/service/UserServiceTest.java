@@ -3,11 +3,11 @@ package com.itechart.finnhubapi.service;
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.UserDtoResponse;
 import com.itechart.finnhubapi.mapper.UserMapper;
-import com.itechart.finnhubapi.model.CompanyEntity;
-import com.itechart.finnhubapi.model.RoleEntity;
+import com.itechart.finnhubapi.model.entity.CompanyEntity;
+import com.itechart.finnhubapi.model.entity.RoleEntity;
 import com.itechart.finnhubapi.model.Subscription;
-import com.itechart.finnhubapi.model.SubscriptionEntity;
-import com.itechart.finnhubapi.model.UserEntity;
+import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
+import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.repository.CompanyRepository;
 import com.itechart.finnhubapi.repository.RoleRepository;
 import com.itechart.finnhubapi.repository.SubscriptionRepository;
@@ -131,7 +131,7 @@ public class UserServiceTest {
     void updateUser() {
         doReturn(user).when(userRepository).save(any(UserEntity.class));
         doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
-        UserDtoResponse userEntity = userService.updateUser(UserMapper.INSTANCE.userToUserDto(user));
+        UserDtoResponse userEntity = userService.updateUser(UserMapper.INSTANCE.userToUserUpdateDto(user));
         assertThat(userEntity.getEmail()).isEqualTo(user.getEmail());
         verify(userRepository, times(1)).save(any(UserEntity.class));
         verify(userRepository, times(1)).findByUsername(any());

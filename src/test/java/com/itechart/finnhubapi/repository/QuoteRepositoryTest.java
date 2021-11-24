@@ -1,7 +1,7 @@
 package com.itechart.finnhubapi.repository;
 
-import com.itechart.finnhubapi.model.CompanyEntity;
-import com.itechart.finnhubapi.model.QuoteEntity;
+import com.itechart.finnhubapi.model.entity.CompanyEntity;
+import com.itechart.finnhubapi.model.entity.QuoteEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

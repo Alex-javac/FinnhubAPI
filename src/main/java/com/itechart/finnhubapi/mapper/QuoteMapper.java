@@ -1,7 +1,7 @@
 package com.itechart.finnhubapi.mapper;
 
 import com.itechart.finnhubapi.dto.QuoteDto;
-import com.itechart.finnhubapi.model.QuoteEntity;
+import com.itechart.finnhubapi.model.entity.QuoteEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

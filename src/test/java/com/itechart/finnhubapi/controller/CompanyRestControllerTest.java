@@ -3,7 +3,7 @@ package com.itechart.finnhubapi.controller;
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.CompanyDtoRequest;
 import com.itechart.finnhubapi.mapper.CompanyMapper;
-import com.itechart.finnhubapi.model.CompanyEntity;
+import com.itechart.finnhubapi.model.entity.CompanyEntity;
 import com.itechart.finnhubapi.service.CompanyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;

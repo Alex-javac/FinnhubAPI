@@ -1,7 +1,7 @@
 package com.itechart.finnhubapi.util;
 
-import com.itechart.finnhubapi.model.CompanyEntity;
-import com.itechart.finnhubapi.model.UserEntity;
+import com.itechart.finnhubapi.model.entity.CompanyEntity;
+import com.itechart.finnhubapi.model.entity.UserEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 

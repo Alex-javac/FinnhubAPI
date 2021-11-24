@@ -12,11 +12,10 @@ import javax.validation.constraints.NotNull;
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserDto {
+public class UserUpdateDto {
     @JsonProperty("id")
     private Long id;
     @NotNull
-    @NotEmpty
     @JsonProperty("login")
     private String username;
     @JsonProperty("first_name")
@@ -24,12 +23,10 @@ public class UserDto {
     @JsonProperty("last_name")
     private String lastName;
     @NotNull
-    @NotEmpty
     @Email
     @JsonProperty("email")
     private String email;
     @NotNull
-    @NotEmpty
     @JsonProperty("password")
     private String password;
 }

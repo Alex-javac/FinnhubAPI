@@ -1,4 +1,4 @@
-package com.itechart.finnhubapi.model;
+package com.itechart.finnhubapi.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;

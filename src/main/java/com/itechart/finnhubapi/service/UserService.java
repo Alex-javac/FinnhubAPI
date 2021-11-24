@@ -3,8 +3,9 @@ package com.itechart.finnhubapi.service;
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.UserDto;
 import com.itechart.finnhubapi.dto.UserDtoResponse;
+import com.itechart.finnhubapi.dto.UserUpdateDto;
 import com.itechart.finnhubapi.model.Subscription;
-import com.itechart.finnhubapi.model.UserEntity;
+import com.itechart.finnhubapi.model.entity.UserEntity;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public interface UserService {
 
     UserDtoResponse saveUser(UserDto user);
 
-    UserDtoResponse updateUser(UserDto user);
+    UserDtoResponse updateUser(UserUpdateDto user);
 
     List<UserEntity> findAll();
 
@@ -32,4 +33,6 @@ public interface UserService {
     UserEntity renewSubscription(long month);
 
     List<CompanyDto> deleteOneCompanyFromUser(String symbol);
+
+    UserEntity findByLoginAndPassword(String login, String password);
 }

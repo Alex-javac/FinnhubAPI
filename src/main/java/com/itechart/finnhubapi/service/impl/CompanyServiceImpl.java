@@ -9,12 +9,9 @@ import com.itechart.finnhubapi.exceptions.NoDataFoundException;
 import com.itechart.finnhubapi.feignservice.MicroserviceFeignClient;
 import com.itechart.finnhubapi.feignservice.ServiceFeignClient;
 import com.itechart.finnhubapi.mapper.CompanyMapper;
-import com.itechart.finnhubapi.mapper.QuoteMapper;
-import com.itechart.finnhubapi.model.CompanyEntity;
-import com.itechart.finnhubapi.model.QuoteEntity;
-import com.itechart.finnhubapi.model.UserEntity;
+import com.itechart.finnhubapi.model.entity.CompanyEntity;
+import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.repository.CompanyRepository;
-import com.itechart.finnhubapi.repository.QuoteRepository;
 import com.itechart.finnhubapi.service.CompanyService;
 import com.itechart.finnhubapi.service.UserService;
 import com.itechart.finnhubapi.util.UserUtil;
@@ -23,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
