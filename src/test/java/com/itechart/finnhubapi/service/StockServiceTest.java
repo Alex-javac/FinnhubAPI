@@ -5,12 +5,9 @@ import com.itechart.finnhubapi.dto.metricdto.MetricDetailsDto;
 import com.itechart.finnhubapi.dto.metricdto.MetricDto;
 import com.itechart.finnhubapi.exceptions.FinancialException;
 import com.itechart.finnhubapi.exceptions.MetricException;
-import com.itechart.finnhubapi.feignservice.ServiceFeignClient;
-import com.itechart.finnhubapi.model.entity.CompanyEntity;
-import com.itechart.finnhubapi.model.entity.RoleEntity;
+import com.itechart.finnhubapi.feignservice.FinnhubClient;
+import com.itechart.finnhubapi.model.entity.*;
 import com.itechart.finnhubapi.model.Subscription;
-import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
-import com.itechart.finnhubapi.model.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -38,7 +35,7 @@ import static org.mockito.Mockito.verify;
 )
 class StockServiceTest {
     @Mock
-    private ServiceFeignClient serviceFeignClient;
+    private FinnhubClient serviceFeignClient;
     @Mock
     private UserService userService;
     @InjectMocks
@@ -46,6 +43,7 @@ class StockServiceTest {
 
     private final UserEntity user = new UserEntity();
     private final SubscriptionEntity subscription = new SubscriptionEntity();
+    private final SubscriptionTypeEntity subscriptionType =new SubscriptionTypeEntity();
     private final RoleEntity role = new RoleEntity();
     private final CompanyEntity company = new CompanyEntity();
     private final FinancialStatementDto finance = new FinancialStatementDto();
@@ -84,7 +82,8 @@ class StockServiceTest {
 
     @Test
     void getFinancialResponseEntityWithLowSubscription() {
-        subscription.setName(Subscription.LOW.toString());
+        subscriptionType.setName(Subscription.LOW.toString());
+        subscription.setType(subscriptionType);
         subscription.setStartTime(LocalDateTime.now());
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);
@@ -96,7 +95,8 @@ class StockServiceTest {
 
     @Test
     void getFinancialResponseEntityWithHighSubscription() {
-        subscription.setName(Subscription.HIGH.toString());
+        subscriptionType.setName(Subscription.HIGH.toString());
+        subscription.setType(subscriptionType);
         subscription.setStartTime(LocalDateTime.now());
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);
@@ -110,7 +110,8 @@ class StockServiceTest {
 
     @Test
     void getMetricResponseEntityWithLowSubscription() {
-        subscription.setName(Subscription.LOW.toString());
+        subscriptionType.setName(Subscription.LOW.toString());
+        subscription.setType(subscriptionType);
         subscription.setStartTime(LocalDateTime.now());
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);
@@ -122,7 +123,8 @@ class StockServiceTest {
 
     @Test
     void getMetricResponseEntityWithMediumSubscription() {
-        subscription.setName(Subscription.MEDIUM.toString());
+        subscriptionType.setName(Subscription.MEDIUM.toString());
+        subscription.setType(subscriptionType);
         subscription.setStartTime(LocalDateTime.now());
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);

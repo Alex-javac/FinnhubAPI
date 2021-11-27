@@ -4,19 +4,31 @@ import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.UserDto;
 import com.itechart.finnhubapi.dto.UserDtoResponse;
 import com.itechart.finnhubapi.dto.UserUpdateDto;
-import com.itechart.finnhubapi.exceptions.*;
+import com.itechart.finnhubapi.exceptions.CheckValueException;
+import com.itechart.finnhubapi.exceptions.CompanyAlreadyOnListException;
+import com.itechart.finnhubapi.exceptions.CompanyIsNotOnListException;
+import com.itechart.finnhubapi.exceptions.CompanyNotFoundException;
+import com.itechart.finnhubapi.exceptions.EmailOrLoginInDataBaseException;
+import com.itechart.finnhubapi.exceptions.EmptyListCompanyException;
+import com.itechart.finnhubapi.exceptions.IncorrectPasswordOrLoginException;
+import com.itechart.finnhubapi.exceptions.NoDataFoundException;
+import com.itechart.finnhubapi.exceptions.SubscriptionTypeException;
+import com.itechart.finnhubapi.exceptions.UserNotFoundException;
 import com.itechart.finnhubapi.mapper.CompanyMapper;
 import com.itechart.finnhubapi.mapper.UserMapper;
-import com.itechart.finnhubapi.model.entity.CompanyEntity;
 import com.itechart.finnhubapi.model.Role;
-import com.itechart.finnhubapi.model.entity.RoleEntity;
-import com.itechart.finnhubapi.model.Status;
+import com.itechart.finnhubapi.model.StatusSubscription;
+import com.itechart.finnhubapi.model.StatusUser;
 import com.itechart.finnhubapi.model.Subscription;
+import com.itechart.finnhubapi.model.entity.CompanyEntity;
+import com.itechart.finnhubapi.model.entity.RoleEntity;
 import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
+import com.itechart.finnhubapi.model.entity.SubscriptionTypeEntity;
 import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.repository.CompanyRepository;
 import com.itechart.finnhubapi.repository.RoleRepository;
 import com.itechart.finnhubapi.repository.SubscriptionRepository;
+import com.itechart.finnhubapi.repository.SubscriptionTypeRepository;
 import com.itechart.finnhubapi.repository.UserRepository;
 import com.itechart.finnhubapi.service.UserService;
 import com.itechart.finnhubapi.util.UserUtil;
@@ -41,6 +53,7 @@ public class UserServiceImpl implements UserService {
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender emailSender;
+    private final SubscriptionTypeRepository typeRepository;
 
     public UserEntity findById(long id) {
         return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
@@ -58,7 +71,7 @@ public class UserServiceImpl implements UserService {
                 return userEntity;
             }
         }
-        return null;
+        throw new IncorrectPasswordOrLoginException();
     }
 
     public UserDtoResponse saveUser(UserDto user) {
@@ -67,16 +80,21 @@ public class UserServiceImpl implements UserService {
         }
         UserEntity userEntity = UserMapper.INSTANCE.userDtoToUserEntity(user);
         SubscriptionEntity subscription = new SubscriptionEntity();
-        subscription.setName(Subscription.INACTIVE.toString());
+        SubscriptionTypeEntity subscriptionType = typeRepository.findByName(Subscription.BASIC.toString()).orElseThrow(SubscriptionTypeException::new);
+        subscription.setType(subscriptionType);
+        subscription.setStartTime(LocalDateTime.now());
+        subscription.setFinishTime(LocalDateTime.now().plusYears(1));
+        subscription.setStatus(StatusSubscription.ACTIVE.toString());
         SubscriptionEntity saveSubscription = subscriptionRepository.save(subscription);
         userEntity.setSubscription(saveSubscription);
         RoleEntity role = roleRepository.findByName(Role.ROLE_USER_INACTIVE.toString());
         List<RoleEntity> userRoles = new ArrayList<>();
         userRoles.add(role);
-        userEntity.setStatus(Status.ACTIVE.toString());
+        userEntity.setStatus(StatusUser.ACTIVE.toString());
         userEntity.setRoles(userRoles);
         userEntity.setCreated(LocalDateTime.now());
         userEntity.setUpdated(LocalDateTime.now());
+        userEntity.setCompanies(new ArrayList<>());
         userEntity.setPassword(passwordEncoder.encode(user.getPassword()));
         UserDtoResponse savedUser = UserMapper.INSTANCE.userToUserDtoResponse(userRepository.save(userEntity));
         SimpleMailMessage message = new SimpleMailMessage();
@@ -92,21 +110,36 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserDtoResponse updateUser(UserUpdateDto user) {
+        if (isEmailOrLoginInDataBase(user.getEmail(), user.getUsername())) {
+            throw new EmailOrLoginInDataBaseException(user.getEmail(), user.getUsername());
+        }
         UserEntity userEntity = findByUsername(UserUtil.userName());
-        if (user.getFirstName() != null) {
+        if (user.getFirstName() != null && !user.getFirstName().isEmpty()) {
             userEntity.setFirstName(user.getFirstName());
         }
-        if (user.getLastName() != null) {
+        if (user.getLastName() != null && !user.getLastName().isEmpty()) {
             userEntity.setLastName(user.getLastName());
         }
         if (user.getUsername() != null) {
-            userEntity.setUsername(user.getUsername());
+            if (!user.getUsername().isEmpty()) {
+                userEntity.setUsername(user.getUsername());
+            } else {
+                throw new CheckValueException("Login");
+            }
         }
-        if (user.getEmail() != null) {
-            userEntity.setEmail(user.getEmail());
+        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+            if (user.getEmail().contains("@")) {
+                userEntity.setEmail(user.getEmail());
+            } else {
+                throw new CheckValueException("Email");
+            }
         }
         if (user.getPassword() != null) {
-            userEntity.setPassword(passwordEncoder.encode(user.getPassword()));
+            if (!user.getPassword().isEmpty()) {
+                userEntity.setPassword(passwordEncoder.encode(user.getPassword()));
+            } else {
+                throw new CheckValueException("Password");
+            }
         }
         userEntity.setUpdated(LocalDateTime.now());
         return UserMapper.INSTANCE.userToUserDtoResponse(userRepository.save(userEntity));
@@ -125,7 +158,7 @@ public class UserServiceImpl implements UserService {
         if (UserUtil.isCompany(symbol, user)) {
             throw new CompanyAlreadyOnListException(symbol);
         }
-        SubscriptionEntity subscription = user.getSubscription();
+        SubscriptionTypeEntity subscription = user.getSubscription().getType();
         CompanyEntity company = companyRepository.findBySymbol(symbol).orElseThrow(
                 () -> new CompanyNotFoundException(symbol));
         List<CompanyEntity> companies = user.getCompanies();
@@ -149,7 +182,7 @@ public class UserServiceImpl implements UserService {
         UserEntity user = findById(id);
         user.setStatus(status);
         UserEntity userEntity = userRepository.save(user);
-        if (status.equals(Status.ACTIVE.toString())) {
+        if (status.equals(StatusUser.ACTIVE.toString())) {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(userEntity.getEmail());
             message.setSubject("FinnhubAPI");
@@ -181,17 +214,19 @@ public class UserServiceImpl implements UserService {
                 new UserNotFoundException(userName));
     }
 
-    public UserEntity changeSubscription(Subscription subscription) {
+    public UserEntity changeSubscription(Long subscriptionId) {
         UserEntity user = findByUsername(UserUtil.userName());
         SubscriptionEntity subscriptionEntity = user.getSubscription();
-        if (subscription.equals(Subscription.INACTIVE)) {
+        SubscriptionTypeEntity subscriptionType = typeRepository.findById(subscriptionId).orElseThrow(SubscriptionTypeException::new);
+        if (subscriptionType.getName().equals(Subscription.BASIC.toString())) {
             RoleEntity role = roleRepository.findByName(Role.ROLE_USER_INACTIVE.toString());
             List<RoleEntity> userRoles = new ArrayList<>();
             userRoles.add(role);
             user.setRoles(userRoles);
-            subscriptionEntity.setName(subscription.toString());
-            subscriptionEntity.setStartTime(null);
-            subscriptionEntity.setFinishTime(null);
+            subscriptionEntity.setType(subscriptionType);
+            subscriptionEntity.setStatus(StatusSubscription.ACTIVE.toString());
+            subscriptionEntity.setStartTime(LocalDateTime.now());
+            subscriptionEntity.setFinishTime(LocalDateTime.now().plusYears(1));
             SubscriptionEntity saveSubscription = subscriptionRepository.save(subscriptionEntity);
             user.setSubscription(saveSubscription);
         } else {
@@ -201,11 +236,11 @@ public class UserServiceImpl implements UserService {
                 userRoles.add(role);
                 user.setRoles(userRoles);
             }
-            subscriptionEntity.setName(subscription.toString());
+            subscriptionEntity.setType(subscriptionType);
             subscriptionEntity.setStartTime(LocalDateTime.now());
             subscriptionEntity.setFinishTime(LocalDateTime.now().plusMonths(3));
             SubscriptionEntity saveSubscription = subscriptionRepository.save(subscriptionEntity);
-            if (subscription.equals(Subscription.LOW) && user.getCompanies().size() > 2) {
+            if (subscriptionType.getName().equals(Subscription.LOW.toString()) && user.getCompanies().size() > 2) {
                 List<CompanyEntity> companies = user.getCompanies();
                 companies.remove(companies.size() - 1);
                 user.setCompanies(companies);
@@ -232,7 +267,7 @@ public class UserServiceImpl implements UserService {
                 () -> new CompanyNotFoundException(symbol));
         if (companies.contains(company)) {
             companies.remove(company);
-        }else {
+        } else {
             throw new CompanyIsNotOnListException(symbol);
         }
         user.setCompanies(companies);
@@ -244,8 +279,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private boolean isEmailOrLoginInDataBase(String email, String login) {
-        UserEntity userEntityByEmail = userRepository.findByEmail(email).orElse(null);
-        UserEntity userEntityByLogin = userRepository.findByUsername(login).orElse(null);
-        return userEntityByLogin != null && userEntityByEmail != null;
+        boolean emptyLogin = userRepository.findByUsername(login).isEmpty();
+        boolean emptyEmail = userRepository.findByEmail(email).isEmpty();
+        return !emptyLogin || !emptyEmail;
     }
 }

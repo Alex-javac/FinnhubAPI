@@ -65,7 +65,7 @@ class UserRestControllerTest {
         user.setStatus("ACTIVE");
         user.setFirstName("TestFirst");
         user.setLastName("TestLast");
-        subscription.setName(Subscription.LOW.toString());
+//        subscription.setName(Subscription.LOW.toString());
         subscription.setStartTime(LocalDateTime.now());
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 @FeignClient(name = "microservice", url = "http://localhost:8181")
-public interface MicroserviceFeignClient {
+public interface QuoteMicroserviceClient {
     @GetMapping("/microservice/getQuote/{symbol}")
     List<QuoteDto> getQuote(@PathVariable String symbol);
 

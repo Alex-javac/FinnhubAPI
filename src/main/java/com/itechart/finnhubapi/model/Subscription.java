@@ -1,7 +1,7 @@
 package com.itechart.finnhubapi.model;
 
 public enum Subscription {
-    INACTIVE,
+    BASIC,
     LOW,
     MEDIUM,
     HIGH;

@@ -1,10 +1,13 @@
 package com.itechart.finnhubapi.service;
 
-import com.itechart.finnhubapi.dto.SubscriptionNameDto;
+import com.itechart.finnhubapi.dto.SubscriptionIdDto;
 import com.itechart.finnhubapi.exceptions.PayPalException;
 import com.itechart.finnhubapi.exceptions.SubscriptionPaidException;
+import com.itechart.finnhubapi.exceptions.SubscriptionTypeException;
 import com.itechart.finnhubapi.model.Subscription;
+import com.itechart.finnhubapi.model.entity.SubscriptionTypeEntity;
 import com.itechart.finnhubapi.model.entity.UserEntity;
+import com.itechart.finnhubapi.repository.SubscriptionTypeRepository;
 import com.itechart.finnhubapi.util.UserUtil;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Links;
@@ -30,7 +33,7 @@ import java.util.List;
 public class PaypalService {
     private final APIContext apiContext;
     private final UserService userService;
-
+private final SubscriptionTypeRepository typeRepository;
     @Value("${paypal.success.url}")
     private String successUrl;
     @Value("${paypal.cancel.url}")
@@ -42,27 +45,22 @@ public class PaypalService {
     @Value("${paypal.intent}")
     private String intent;
 
-    public String paymentForSubscription(SubscriptionNameDto subscription) {
-        double price;
-        switch (subscription.getName()) {
-            case LOW -> price = 10.00;
-            case MEDIUM -> price = 20.00;
-            case HIGH -> price = 30.00;
-            default -> price = 0.00;
-        }
+    public String paymentForSubscription(SubscriptionIdDto subscription) {
+        SubscriptionTypeEntity subscriptionType = typeRepository.findById(subscription.getId()).orElseThrow(SubscriptionTypeException::new);
+        double price=subscriptionType.getPrice();
         UserEntity user = userService.findByUsername(UserUtil.userName());
-        if (!user.getSubscription().getName().equals(subscription.getName().toString())) {
-            Payment payment = createPayment(price, subscription.getName());
+        if (!user.getSubscription().getType().getName().equals(subscriptionType.getName())) {
+            Payment payment = createPayment(price, subscription.getId());
             for (Links link : payment.getLinks()) {
                 if (link.getRel().equals("approval_url")) return link.getHref();
             }
         } else {
-            throw new SubscriptionPaidException(user.getSubscription().getName());
+            throw new SubscriptionPaidException(user.getSubscription().getType().getName());
         }
         return null;
     }
 
-    private Payment createPayment(Double total, Subscription description) {
+    private Payment createPayment(Double total, Long subscriptionId) {
         try {
             Amount amount = new Amount();
             amount.setCurrency(currency);
@@ -70,7 +68,7 @@ public class PaypalService {
             amount.setTotal(String.valueOf(total));
 
             Transaction transaction = new Transaction();
-            transaction.setDescription(description.toString());
+            transaction.setDescription(subscriptionId.toString());
             transaction.setAmount(amount);
 
             List<Transaction> transactions = new ArrayList<>();
@@ -85,7 +83,7 @@ public class PaypalService {
             payment.setTransactions(transactions);
             RedirectUrls redirectUrls = new RedirectUrls();
             redirectUrls.setCancelUrl(cancelUrl);
-            redirectUrls.setReturnUrl(successUrl + description);
+            redirectUrls.setReturnUrl(successUrl + subscriptionId);
             payment.setRedirectUrls(redirectUrls);
 
             return payment.create(apiContext);

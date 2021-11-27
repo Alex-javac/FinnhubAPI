@@ -1,7 +1,7 @@
 package com.itechart.finnhubapi.controller;
 
 import com.itechart.finnhubapi.dto.*;
-import com.itechart.finnhubapi.model.Status;
+import com.itechart.finnhubapi.model.StatusUser;
 import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.security.JwtProvider;
 import com.itechart.finnhubapi.service.SubscriptionService;
@@ -39,7 +39,7 @@ public class MainController {
     @PostMapping("/auth")
     public ResponseEntity<AuthResponse> auth(@RequestBody AuthRequest request) {
         UserEntity userEntity = userService.findByLoginAndPassword(request.getLogin(), request.getPassword());
-        String token = jwtProvider.generateToken(userEntity.getEmail());
+        String token = jwtProvider.generateToken(userEntity);
         return new ResponseEntity<>(new AuthResponse(token), HttpStatus.OK);
     }
 
@@ -53,14 +53,14 @@ public class MainController {
     @PostMapping(value = "/lockingUser/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserEntity> locking(@PathVariable("id") Long id) {
-        UserEntity blockedUser = userService.lockOrUnlock(id, Status.BLOCKED.toString());
+        UserEntity blockedUser = userService.lockOrUnlock(id, StatusUser.BLOCKED.toString());
         return new ResponseEntity<>(blockedUser, HttpStatus.OK);
     }
 
     @PostMapping(value = "/unlockingUser/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserEntity> unlocking(@PathVariable("id") Long id) {
-        UserEntity activeUser = userService.lockOrUnlock(id, Status.ACTIVE.toString());
+        UserEntity activeUser = userService.lockOrUnlock(id, StatusUser.ACTIVE.toString());
         return new ResponseEntity<>(activeUser, HttpStatus.OK);
     }
 
@@ -73,8 +73,8 @@ public class MainController {
 
     @PostMapping(value = "/changeSubscription")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserEntity> changeSubscription(@RequestBody SubscriptionNameDto subscription) {
-        UserEntity user = userService.changeSubscription(subscription.getName());
+    public ResponseEntity<UserEntity> changeSubscription(@RequestBody SubscriptionIdDto subscription) {
+        UserEntity user = userService.changeSubscription(subscription.getId());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 

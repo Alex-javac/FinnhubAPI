@@ -48,12 +48,26 @@
     </changeSet>
 
     <changeSet id="1.0.1" author="alexander.alekseyuk">
-        <createTable tableName="subscription">
+        <createTable tableName="subscription_type">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
             <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="price" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="subscription">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="status" type="VARCHAR(100)">
                 <constraints nullable="false"/>
             </column>
 
@@ -63,8 +77,13 @@
             <column name="finish_time" type="TIMESTAMP" defaultValue="CURRENT_TIMESTAMP()">
             </column>
 
+            <column name="subscription_type_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
         </createTable>
     </changeSet>
+
 
     <changeSet id="1.0.2" author="alexander.alekseyuk">
         <addForeignKeyConstraint baseColumnNames="subscription_id"
@@ -74,6 +93,14 @@
                                  onUpdate="RESTRICT"
                                  referencedColumnNames="id"
                                  referencedTableName="subscription"/>
+
+        <addForeignKeyConstraint baseColumnNames="subscription_type_id"
+                                 baseTableName="subscription"
+                                 constraintName="fk_subscriptions_subscription_type"
+                                 onDelete="CASCADE"
+                                 onUpdate="RESTRICT"
+                                 referencedColumnNames="id"
+                                 referencedTableName="subscription_type"/>
     </changeSet>
 
     <changeSet id="1.0.3" author="alexander.alekseyuk">

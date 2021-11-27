@@ -14,8 +14,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
-import static org.springframework.util.StringUtils.hasText;
-
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class JwtFilter extends GenericFilterBean {
@@ -29,18 +27,17 @@ public class JwtFilter extends GenericFilterBean {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         String token = getTokenFromRequest((HttpServletRequest) servletRequest);
         if (token != null && jwtProvider.validateToken(token)) {
-            String userLogin = jwtProvider.getEmailFromToken(token);
-            CustomUserDetails customUserDetails = customUserDetailsService.loadUserByUsername(userLogin);
+            String userID = jwtProvider.getIdFromToken(token);
+            CustomUserDetails customUserDetails = customUserDetailsService.loadUserByUsername(userID);
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
         filterChain.doFilter(servletRequest, servletResponse);
     }
 
-
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearer = request.getHeader(AUTHORIZATION);
-        if (hasText(bearer) && bearer.startsWith("Bearer ")) {
+        if (bearer != null && bearer.startsWith("Bearer ")) {
             return bearer.substring(7);
         }
         return null;

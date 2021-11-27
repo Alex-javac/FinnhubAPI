@@ -48,7 +48,7 @@ class UserRepositoryTest {
         user.setStatus("ACTIVE");
         user.setFirstName("TestFirst");
         user.setLastName("TestLast");
-        subscription.setName(Subscription.LOW.toString());
+//        subscription.setType(Subscription.LOW.toString());
         subscription.setStartTime(LocalDateTime.now());
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         subscriptionRepository.save(subscription);

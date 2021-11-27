@@ -2,7 +2,7 @@ package com.itechart.finnhubapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itechart.finnhubapi.dto.MonthDto;
-import com.itechart.finnhubapi.dto.SubscriptionNameDto;
+import com.itechart.finnhubapi.dto.SubscriptionIdDto;
 import com.itechart.finnhubapi.dto.UserDto;
 import com.itechart.finnhubapi.dto.UserUpdateDto;
 import com.itechart.finnhubapi.mapper.UserMapper;
@@ -67,7 +67,7 @@ class MainControllerTest {
         user.setStatus("ACTIVE");
         user.setFirstName("TestFirst");
         user.setLastName("TestLast");
-        subscription.setName(Subscription.LOW.toString());
+//        subscription.setName(Subscription.LOW.toString());
         subscription.setStartTime(LocalDateTime.now());
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);
@@ -149,9 +149,9 @@ class MainControllerTest {
 
     @Test
     void changeSubscription() throws Exception {
-        SubscriptionNameDto subscriptionNameDto = new SubscriptionNameDto();
-        subscriptionNameDto.setName(Subscription.LOW);
-        doReturn(user).when(userService).changeSubscription(any(Subscription.class));
+        SubscriptionIdDto subscriptionNameDto = new SubscriptionIdDto();
+        subscriptionNameDto.setId(2L);
+        doReturn(user).when(userService).changeSubscription(anyLong());
         MvcResult result = mvc.perform(post("/api/v1/changeSubscription")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(subscriptionNameDto)))
@@ -159,7 +159,7 @@ class MainControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isNotNull();
-        verify(userService, times(1)).changeSubscription(any(Subscription.class));
+        verify(userService, times(1)).changeSubscription(anyLong());
     }
 
     @Test

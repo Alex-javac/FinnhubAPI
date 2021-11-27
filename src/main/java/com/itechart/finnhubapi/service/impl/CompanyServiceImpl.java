@@ -6,8 +6,8 @@ import com.itechart.finnhubapi.dto.QuoteDto;
 import com.itechart.finnhubapi.exceptions.CompanyIsNotOnListException;
 import com.itechart.finnhubapi.exceptions.CompanyNotFoundException;
 import com.itechart.finnhubapi.exceptions.NoDataFoundException;
-import com.itechart.finnhubapi.feignservice.MicroserviceFeignClient;
-import com.itechart.finnhubapi.feignservice.ServiceFeignClient;
+import com.itechart.finnhubapi.feignservice.QuoteMicroserviceClient;
+import com.itechart.finnhubapi.feignservice.FinnhubClient;
 import com.itechart.finnhubapi.mapper.CompanyMapper;
 import com.itechart.finnhubapi.model.entity.CompanyEntity;
 import com.itechart.finnhubapi.model.entity.UserEntity;
@@ -29,8 +29,8 @@ public class CompanyServiceImpl implements CompanyService {
     private String token;
     private final CompanyRepository companyRepository;
     private final UserService userService;
-    private final ServiceFeignClient serviceFeignClient;
-    private final MicroserviceFeignClient microserviceFeignClient;
+    private final FinnhubClient serviceFeignClient;
+    private final QuoteMicroserviceClient quoteMicroserviceClient;
 
     public CompanyEntity getEntityBySymbol(String symbol) {
         return companyRepository.findBySymbol(symbol).orElseThrow(
@@ -49,7 +49,7 @@ public class CompanyServiceImpl implements CompanyService {
                         .orElseGet(() -> {
                             CompanyEntity companyEntity = CompanyMapper.INSTANCE.companyDtoToCompanyEntity(companyDto);
                             CompanyDtoRequest companyDtoRequest = CompanyMapper.INSTANCE.companyToCompanyDtoRequest(companyEntity);
-                            microserviceFeignClient.saveCompany(companyDtoRequest);
+                            quoteMicroserviceClient.saveCompany(companyDtoRequest);
                             return companyRepository.save(companyEntity);
                         }));
         return true;
@@ -70,7 +70,7 @@ public class CompanyServiceImpl implements CompanyService {
     public List<QuoteDto> getQuote(String symbol) {
         UserEntity user = userService.findByUsername(UserUtil.userName());
         if (UserUtil.isCompany(symbol, user)) {
-            return microserviceFeignClient.getQuote(symbol);
+            return quoteMicroserviceClient.getQuote(symbol);
         } else {
             throw new CompanyIsNotOnListException(symbol);
         }
@@ -80,12 +80,12 @@ public class CompanyServiceImpl implements CompanyService {
         CompanyEntity company = getEntityBySymbol(symbol);
         Long id = company.getId();
         companyRepository.deleteById(id);
-        microserviceFeignClient.deleteCompany(symbol);
+        quoteMicroserviceClient.deleteCompany(symbol);
         return !companyRepository.existsById(id);
     }
 
     public boolean saveQuote() {
-        microserviceFeignClient.saveQuote();
+        quoteMicroserviceClient.saveQuote();
         return true;
     }
 }

@@ -28,7 +28,7 @@ public interface UserService {
 
     UserEntity findByUsername(String userName);
 
-    UserEntity changeSubscription(Subscription subscription);
+    UserEntity changeSubscription(Long subscriptionId);
 
     UserEntity renewSubscription(long month);
 

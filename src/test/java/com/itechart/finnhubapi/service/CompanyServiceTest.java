@@ -1,8 +1,8 @@
 package com.itechart.finnhubapi.service;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
-import com.itechart.finnhubapi.feignservice.MicroserviceFeignClient;
-import com.itechart.finnhubapi.feignservice.ServiceFeignClient;
+import com.itechart.finnhubapi.feignservice.QuoteMicroserviceClient;
+import com.itechart.finnhubapi.feignservice.FinnhubClient;
 import com.itechart.finnhubapi.mapper.CompanyMapper;
 import com.itechart.finnhubapi.model.entity.CompanyEntity;
 import com.itechart.finnhubapi.model.entity.QuoteEntity;
@@ -42,9 +42,9 @@ class CompanyServiceTest {
     @Mock
     private QuoteRepository quoteRepository;
     @Mock
-    private ServiceFeignClient serviceFeignClient;
+    private FinnhubClient serviceFeignClient;
     @Mock
-    private MicroserviceFeignClient microserviceFeignClient;
+    private QuoteMicroserviceClient microserviceFeignClient;
     @InjectMocks
     private CompanyServiceImpl companyService;
 

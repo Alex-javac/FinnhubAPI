@@ -1,7 +1,7 @@
 package com.itechart.finnhubapi.controller;
 
-import com.itechart.finnhubapi.dto.SubscriptionNameDto;
-import com.itechart.finnhubapi.model.Subscription;
+import com.itechart.finnhubapi.dto.SubscriptionIdDto;
+import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.service.PaypalService;
 import com.itechart.finnhubapi.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -26,15 +26,23 @@ public class SubscriptionController {
     private final UserService userService;
 
     @PostMapping("/payment")
-    public String paymentForSubscription(@RequestBody SubscriptionNameDto subscription) {
+    public String paymentForSubscription(@RequestBody SubscriptionIdDto subscription) {
         return paypalService.paymentForSubscription(subscription);
     }
 
     @GetMapping("/success/{subscription}")
-    public ResponseEntity<String> successPayment(@PathVariable("subscription") String subscription, HttpServletRequest request){
+    public ResponseEntity<String> successPayment(@PathVariable("subscription") long subscription, HttpServletRequest request) {
         paypalService.executePayment(request.getParameter("paymentId"), request.getParameter("PayerID"));
-        userService.changeSubscription(Subscription.valueOf(subscription.toUpperCase()));
-        return new ResponseEntity<>("Payment was successful", HttpStatus.OK);
+        UserEntity userEntity = userService.changeSubscription(subscription);
+        String lastName = userEntity.getLastName();
+        String firstName = userEntity.getLastName();
+        Double price = userEntity.getSubscription().getType().getPrice();
+        String name = userEntity.getSubscription().getType().getName();
+        return new ResponseEntity<>(String.format("""
+                Payment was successful\s
+                User: %s %s\s
+                Subscription: %s\s
+                Price: %.2f USD""", lastName, firstName, name, price), HttpStatus.OK);
     }
 
     @GetMapping("/cancel")

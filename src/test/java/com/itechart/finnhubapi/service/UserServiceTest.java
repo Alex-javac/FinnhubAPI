@@ -76,7 +76,7 @@ public class UserServiceTest {
         user.setStatus("ACTIVE");
         user.setFirstName("TestFirst");
         user.setLastName("TestLast");
-        subscription.setName(Subscription.LOW.toString());
+//        subscription.setName(Subscription.LOW.toString());
         subscription.setStartTime(LocalDateTime.now());
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);
@@ -194,7 +194,7 @@ public class UserServiceTest {
         doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
         doReturn(user.getSubscription()).when(subscriptionRepository).save(any(SubscriptionEntity.class));
         doReturn(user).when(userRepository).save(any(UserEntity.class));
-        UserEntity userEntity = userService.changeSubscription(Subscription.HIGH);
+        UserEntity userEntity = userService.changeSubscription(4L);
         assertThat(userEntity.getSubscription()).isEqualTo(user.getSubscription());
         verify(userRepository, times(1)).findByUsername(any());
         verify(subscriptionRepository, times(1)).save(any(SubscriptionEntity.class));
@@ -206,7 +206,7 @@ public class UserServiceTest {
         doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
         doReturn(user.getSubscription()).when(subscriptionRepository).save(any(SubscriptionEntity.class));
         doReturn(user).when(userRepository).save(any(UserEntity.class));
-        UserEntity userEntity = userService.changeSubscription(Subscription.HIGH);
+        UserEntity userEntity = userService.changeSubscription(4L);
         assertThat(userEntity.getSubscription()).isEqualTo(user.getSubscription());
         verify(userRepository, times(1)).findByUsername(any());
         verify(subscriptionRepository, times(1)).save(any(SubscriptionEntity.class));

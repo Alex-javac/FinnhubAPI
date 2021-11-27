@@ -1,6 +1,6 @@
 package com.itechart.finnhubapi.security;
 
-import com.itechart.finnhubapi.model.Status;
+import com.itechart.finnhubapi.model.StatusUser;
 import com.itechart.finnhubapi.model.entity.RoleEntity;
 import com.itechart.finnhubapi.model.entity.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
@@ -58,7 +58,7 @@ public class CustomUserDetails implements UserDetails {
         customUserDetails.password = user.getPassword();
         customUserDetails.username = user.getUsername();
         customUserDetails.authorities = mapToGrantedAuthorities(user.getRoles());
-        customUserDetails.isActive = user.getStatus().equals(Status.ACTIVE.toString());
+        customUserDetails.isActive = user.getStatus().equals(StatusUser.ACTIVE.toString());
         return customUserDetails;
     }
 

@@ -1,6 +1,6 @@
 package com.itechart.finnhubapi.model;
 
-public enum Status {
+public enum StatusUser {
     ACTIVE,
     BLOCKED
 }

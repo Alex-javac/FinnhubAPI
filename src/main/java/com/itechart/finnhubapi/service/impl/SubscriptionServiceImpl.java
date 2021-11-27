@@ -1,10 +1,14 @@
 package com.itechart.finnhubapi.service.impl;
 
-import com.itechart.finnhubapi.model.*;
+import com.itechart.finnhubapi.exceptions.SubscriptionTypeException;
+import com.itechart.finnhubapi.model.Role;
+import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.model.entity.RoleEntity;
 import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
+import com.itechart.finnhubapi.model.entity.SubscriptionTypeEntity;
 import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.repository.RoleRepository;
+import com.itechart.finnhubapi.repository.SubscriptionTypeRepository;
 import com.itechart.finnhubapi.repository.UserRepository;
 import com.itechart.finnhubapi.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +30,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final UserRepository userRepository;
     private final JavaMailSender emailSender;
     private final RoleRepository roleRepository;
+    private final SubscriptionTypeRepository typeRepository;
 
     public Map<String, Long> verificationSubscriptions() {
         Map<String, Long> result = new HashMap<>();
@@ -33,7 +38,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         long warned = 0L;
         List<UserEntity> allUsers = userRepository.findAll();
         for (UserEntity user : allUsers) {
-            if(user.getSubscription().getName().equals(Subscription.INACTIVE.toString())){
+            if (user.getSubscription().getType().getName().equals(Subscription.BASIC.toString())) {
                 continue;
             }
             LocalDateTime dateTime = user.getSubscription().getFinishTime();
@@ -44,7 +49,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 userRoles.add(role);
                 user.setRoles(userRoles);
                 SubscriptionEntity subscription = user.getSubscription();
-                subscription.setName(Subscription.INACTIVE.toString());
+                SubscriptionTypeEntity subscriptionType = typeRepository.findByName(Subscription.BASIC.toString()).orElseThrow(SubscriptionTypeException::new);
+                subscription.setType(subscriptionType);
                 subscription.setStartTime(null);
                 subscription.setFinishTime(null);
                 user.setSubscription(subscription);
@@ -52,8 +58,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 SimpleMailMessage message = new SimpleMailMessage();
                 message.setTo(blockedUser.getEmail());
                 message.setSubject("FinnhubAPI");
-                message.setText("subscription expired." + "\n" +
-                        "to activate the subscription, follow the link: " + "http://localhost:8080/api/v1/subscription/payment");
+                message.setText("""
+                        subscription expired.
+                        to activate the subscription, follow the link:\s
+                        http://localhost:8080/api/v1/subscription/payment""");
                 emailSender.send(message);
                 blocked++;
             } else if (between.toDays() < 3) {
