@@ -1,7 +1,7 @@
 package com.itechart.finnhubapi.controller;
 
 import com.itechart.finnhubapi.dto.SubscriptionIdDto;
-import com.itechart.finnhubapi.model.entity.UserEntity;
+import com.itechart.finnhubapi.dto.UserDtoResponse;
 import com.itechart.finnhubapi.service.PaypalService;
 import com.itechart.finnhubapi.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -33,11 +33,11 @@ public class SubscriptionController {
     @GetMapping("/success/{subscription}")
     public ResponseEntity<String> successPayment(@PathVariable("subscription") long subscription, HttpServletRequest request) {
         paypalService.executePayment(request.getParameter("paymentId"), request.getParameter("PayerID"));
-        UserEntity userEntity = userService.changeSubscription(subscription);
-        String lastName = userEntity.getLastName();
-        String firstName = userEntity.getLastName();
-        Double price = userEntity.getSubscription().getType().getPrice();
-        String name = userEntity.getSubscription().getType().getName();
+        UserDtoResponse user = userService.changeSubscription(subscription);
+        String lastName = user.getLastName();
+        String firstName = user.getFirstName();
+        Double price = user.getSubscription().getType().getPrice();
+        String name = user.getSubscription().getType().getName();
         return new ResponseEntity<>(String.format("""
                 Payment was successful\s
                 User: %s %s\s

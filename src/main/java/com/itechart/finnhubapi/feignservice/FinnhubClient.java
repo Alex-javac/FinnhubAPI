@@ -1,7 +1,6 @@
 package com.itechart.finnhubapi.feignservice;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
-import com.itechart.finnhubapi.dto.QuoteDto;
 import com.itechart.finnhubapi.dto.financialdto.FinancialStatementDto;
 import com.itechart.finnhubapi.dto.metricdto.MetricDto;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -22,8 +21,4 @@ public interface FinnhubClient {
     @GetMapping("/stock/financials-reported?symbol={symbol}&token={token}")
     FinancialStatementDto getFinance(@PathVariable(name = "symbol") String symbol,
                                      @PathVariable(name = "token") String token);
-
-    @GetMapping("/quote?symbol={symbol}&token={token}")
-    QuoteDto getQuote(@PathVariable(name = "symbol") String symbol,
-                      @PathVariable(name = "token") String token);
 }

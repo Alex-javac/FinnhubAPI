@@ -1,6 +1,12 @@
 package com.itechart.finnhubapi.controller;
 
-import com.itechart.finnhubapi.dto.*;
+import com.itechart.finnhubapi.dto.AuthRequest;
+import com.itechart.finnhubapi.dto.AuthResponse;
+import com.itechart.finnhubapi.dto.MonthDto;
+import com.itechart.finnhubapi.dto.SubscriptionIdDto;
+import com.itechart.finnhubapi.dto.UserDto;
+import com.itechart.finnhubapi.dto.UserDtoResponse;
+import com.itechart.finnhubapi.dto.UserUpdateDto;
 import com.itechart.finnhubapi.model.StatusUser;
 import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.security.JwtProvider;
@@ -52,16 +58,20 @@ public class MainController {
 
     @PostMapping(value = "/lockingUser/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserEntity> locking(@PathVariable("id") Long id) {
-        UserEntity blockedUser = userService.lockOrUnlock(id, StatusUser.BLOCKED.toString());
-        return new ResponseEntity<>(blockedUser, HttpStatus.OK);
+    public ResponseEntity<String> locking(@PathVariable("id") Long id) {
+        UserDtoResponse blockedUser = userService.lockOrUnlock(id, StatusUser.BLOCKED.toString());
+        String str = String.format("User %s %s " + "\n" +
+                " was blocked", blockedUser.getFirstName(), blockedUser.getLastName());
+        return new ResponseEntity<>(str, HttpStatus.OK);
     }
 
     @PostMapping(value = "/unlockingUser/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserEntity> unlocking(@PathVariable("id") Long id) {
-        UserEntity activeUser = userService.lockOrUnlock(id, StatusUser.ACTIVE.toString());
-        return new ResponseEntity<>(activeUser, HttpStatus.OK);
+    public ResponseEntity<String> unlocking(@PathVariable("id") Long id) {
+        UserDtoResponse activeUser = userService.lockOrUnlock(id, StatusUser.ACTIVE.toString());
+        String str = String.format("User %s %s " + "\n" +
+                " was unblocked", activeUser.getFirstName(), activeUser.getLastName());
+        return new ResponseEntity<>(str, HttpStatus.OK);
     }
 
     @PostMapping(value = "/deleteUser/{id}")
@@ -73,15 +83,15 @@ public class MainController {
 
     @PostMapping(value = "/changeSubscription")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserEntity> changeSubscription(@RequestBody SubscriptionIdDto subscription) {
-        UserEntity user = userService.changeSubscription(subscription.getId());
+    public ResponseEntity<UserDtoResponse> changeSubscription(@RequestBody SubscriptionIdDto subscription) {
+        UserDtoResponse user = userService.changeSubscription(subscription.getId());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @PostMapping(value = "/renewSubscription")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserEntity> renewSubscription(@RequestBody MonthDto month) {
-        UserEntity user = userService.renewSubscription(month.getMonth());
+    public ResponseEntity<UserDtoResponse> renewSubscription(@RequestBody MonthDto month) {
+        UserDtoResponse user = userService.renewSubscription(month.getMonth());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 

@@ -1,6 +1,5 @@
 package com.itechart.finnhubapi.security;
 
-import com.itechart.finnhubapi.exceptions.JwtAuthenticationException;
 import com.itechart.finnhubapi.model.entity.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -26,7 +25,6 @@ public class JwtProvider {
         Claims claims = Jwts.claims().setSubject(user.getEmail());
         claims.setId(user.getId().toString());
         claims.put("login", user.getUsername());
-        claims.put("password", user.getPassword());
 
         Date now = new Date();
         Date timeline = new Date(now.getTime() + tokenTime);
@@ -40,20 +38,23 @@ public class JwtProvider {
     }
 
     public boolean validateToken(String token) {
+        String exp = "";
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
             return !claims.getBody().getExpiration().before(new Date());
         } catch (ExpiredJwtException expEx) {
-            throw new JwtAuthenticationException("Token expired");
+            exp = "Token expired";
         } catch (UnsupportedJwtException unsEx) {
-            throw new JwtAuthenticationException("Unsupported jwt");
+            exp = "Unsupported jwt";
         } catch (MalformedJwtException mjEx) {
-            throw new JwtAuthenticationException("Malformed jwt");
+            exp = "Malformed jwt";
         } catch (SignatureException sEx) {
-            throw new JwtAuthenticationException("Invalid signature");
+            exp = "Invalid signature";
         } catch (Exception e) {
-            throw new JwtAuthenticationException("invalid token");
+            exp = "invalid token";
         }
+        System.out.println(exp);
+        return false;
     }
 
     public String getIdFromToken(String token) {

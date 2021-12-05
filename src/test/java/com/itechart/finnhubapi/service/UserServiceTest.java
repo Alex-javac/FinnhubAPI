@@ -1,17 +1,18 @@
 package com.itechart.finnhubapi.service;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
+import com.itechart.finnhubapi.dto.SubscriptionTypeDto;
 import com.itechart.finnhubapi.dto.UserDtoResponse;
+import com.itechart.finnhubapi.mapper.CompanyMapper;
 import com.itechart.finnhubapi.mapper.UserMapper;
+import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.model.entity.CompanyEntity;
 import com.itechart.finnhubapi.model.entity.RoleEntity;
-import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
+import com.itechart.finnhubapi.model.entity.SubscriptionTypeEntity;
 import com.itechart.finnhubapi.model.entity.UserEntity;
-import com.itechart.finnhubapi.repository.CompanyRepository;
-import com.itechart.finnhubapi.repository.RoleRepository;
-import com.itechart.finnhubapi.repository.SubscriptionRepository;
-import com.itechart.finnhubapi.repository.UserRepository;
+import com.itechart.finnhubapi.repository.*;
+import com.itechart.finnhubapi.service.impl.CompanyUserService;
 import com.itechart.finnhubapi.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -32,6 +33,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -56,6 +58,10 @@ public class UserServiceTest {
     private PasswordEncoder passwordEncoder;
     @Mock
     private JavaMailSender emailSender;
+    @Mock
+    private SubscriptionTypeRepository typeRepository;
+    @Mock
+    private CompanyUserService companyUserService;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -64,6 +70,7 @@ public class UserServiceTest {
     private final SubscriptionEntity subscription = new SubscriptionEntity();
     private final RoleEntity role = new RoleEntity();
     private final CompanyEntity company = new CompanyEntity();
+    private final SubscriptionTypeEntity subscriptionType = new SubscriptionTypeEntity();
 
     @BeforeEach
     void setUp() {
@@ -76,7 +83,8 @@ public class UserServiceTest {
         user.setStatus("ACTIVE");
         user.setFirstName("TestFirst");
         user.setLastName("TestLast");
-//        subscription.setName(Subscription.LOW.toString());
+        subscriptionType.setName(Subscription.LOW.toString());
+        subscription.setType(subscriptionType);
         subscription.setStartTime(LocalDateTime.now());
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);
@@ -92,14 +100,13 @@ public class UserServiceTest {
         company.setCurrency("USD");
         company.setDescription("JOHN WOOD GROUP PLC");
         company.setDisplaySymbol("WDGJF");
-        user.setCompanies(new ArrayList<>());
     }
 
     @Test
     void findById() {
         doReturn(Optional.of(user)).when(userRepository).findById(3L);
-        UserEntity userEntity = userService.findById(3L);
-        assertThat(userEntity).isEqualTo(user);
+        UserDtoResponse userEntity = userService.findById(3L);
+        assertThat(userEntity.getUsername()).isEqualTo(user.getUsername());
     }
 
     @Test
@@ -107,7 +114,7 @@ public class UserServiceTest {
         doReturn(Optional.of(user)).when(userRepository).findById(anyLong());
         doThrow(RuntimeException.class).when(userRepository).deleteById(user.getId());
         assertThrows(RuntimeException.class, () -> userService.deleteById(user.getId()));
-        verify(userRepository,times(1)).findById(anyLong());
+        verify(userRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -116,12 +123,13 @@ public class UserServiceTest {
         doNothing().when(userRepository).deleteById(user.getId());
         userService.deleteById(user.getId());
         verify(userRepository, times(1)).deleteById(anyLong());
-        verify(userRepository,times(1)).findById(anyLong());
+        verify(userRepository, times(1)).findById(anyLong());
     }
 
     @Test
     void saveUser() {
         doReturn(user).when(userRepository).save(any(UserEntity.class));
+        doReturn(Optional.of(user.getSubscription().getType())).when(typeRepository).findByName(anyString());
         UserDtoResponse userEntity = userService.saveUser(UserMapper.INSTANCE.userToUserDto(user));
         assertThat(userEntity.getEmail()).isEqualTo(user.getEmail());
         verify(userRepository, times(1)).save(any(UserEntity.class));
@@ -131,10 +139,13 @@ public class UserServiceTest {
     void updateUser() {
         doReturn(user).when(userRepository).save(any(UserEntity.class));
         doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
+        doReturn(Optional.empty()).when(userRepository).findByEmail(anyString());
+        doReturn(Optional.empty()).when(userRepository).findByUsername(anyString());
         UserDtoResponse userEntity = userService.updateUser(UserMapper.INSTANCE.userToUserUpdateDto(user));
         assertThat(userEntity.getEmail()).isEqualTo(user.getEmail());
         verify(userRepository, times(1)).save(any(UserEntity.class));
-        verify(userRepository, times(1)).findByUsername(any());
+        verify(userRepository, times(1)).findByUsername(anyString());
+        verify(userRepository, times(1)).findByEmail(anyString());
     }
 
     @Test
@@ -149,25 +160,24 @@ public class UserServiceTest {
 
     @Test
     void addCompany() {
-        doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
-        doReturn(Optional.of(company)).when(companyRepository).findBySymbol(any());
-        doReturn(user).when(userRepository).save(any(UserEntity.class));
-        UserEntity userEntity = userService.addCompany(company.getSymbol());
-        assertThat(userEntity).isEqualTo(user);
-        assertThat(userEntity.getCompanies()).isNotEmpty();
-        verify(userRepository, times(1)).save(any(UserEntity.class));
-        verify(userRepository, times(1)).findByUsername(any());
-        verify(companyRepository, times(1)).findBySymbol(any());
+        List<CompanyDto> companyDtoList =new ArrayList<>();
+        companyDtoList.add(CompanyMapper.INSTANCE.companyToCompanyDto(company));
+        doReturn(Optional.of(user)).when(userRepository).findByUsername(null);
+        doReturn(companyDtoList).when(companyUserService).addCompanyToUser(anyString(),anyLong(),any(SubscriptionTypeDto.class));
+        List<CompanyDto> result = userService.addCompany(company.getSymbol());
+        assertThat(result).isEqualTo(companyDtoList);
+        verify(userRepository, times(1)).findByUsername(null);
+        verify(companyUserService, times(1)).addCompanyToUser(anyString(),anyLong(),any(SubscriptionTypeDto.class));
     }
 
     @Test
     void lockOrUnlock() {
         doReturn(Optional.of(user)).when(userRepository).findById(anyLong());
         doReturn(user).when(userRepository).save(any(UserEntity.class));
-        UserEntity userEntity = userService.lockOrUnlock(user.getId(), "BLOCKED");
-        assertThat(userEntity).isEqualTo(user);
+        UserDtoResponse userEntity = userService.lockOrUnlock(user.getId(), "BLOCKED");
+        assertThat(userEntity.getUsername()).isEqualTo(user.getUsername());
         verify(userRepository, times(1)).save(any(UserEntity.class));
-        verify(userRepository,times(1)).findById(anyLong());
+        verify(userRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -179,35 +189,27 @@ public class UserServiceTest {
     }
 
     @Test
-    void getCompaniesFromUser() {
-        List<CompanyEntity> companyEntities = new ArrayList<>();
-        companyEntities.add(company);
-        user.setCompanies(companyEntities);
-        doReturn(Optional.of(user)).when(userRepository).findByUsername(user.getUsername());
-        List<CompanyDto> companiesFromUser = userService.getCompaniesFromUser(user.getUsername());
-        assertThat(companiesFromUser).isNotNull();
-        verify(userRepository, times(1)).findByUsername(user.getUsername());
-    }
-
-    @Test
     void changeSubscription() {
         doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
         doReturn(user.getSubscription()).when(subscriptionRepository).save(any(SubscriptionEntity.class));
+        doReturn(Optional.of(user.getSubscription().getType())).when(typeRepository).findById(anyLong());
         doReturn(user).when(userRepository).save(any(UserEntity.class));
-        UserEntity userEntity = userService.changeSubscription(4L);
-        assertThat(userEntity.getSubscription()).isEqualTo(user.getSubscription());
+        UserDtoResponse userEntity = userService.changeSubscription(4L);
+        assertThat(userEntity.getSubscription().getType().getName()).isEqualTo(user.getSubscription().getType().getName());
         verify(userRepository, times(1)).findByUsername(any());
         verify(subscriptionRepository, times(1)).save(any(SubscriptionEntity.class));
         verify(userRepository, times(1)).save(any(UserEntity.class));
+        verify(typeRepository, times(1)).findById(anyLong());
     }
 
     @Test
     void renewSubscription() {
         doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
         doReturn(user.getSubscription()).when(subscriptionRepository).save(any(SubscriptionEntity.class));
+        doReturn(Optional.of(user.getSubscription().getType())).when(typeRepository).findById(anyLong());
         doReturn(user).when(userRepository).save(any(UserEntity.class));
-        UserEntity userEntity = userService.changeSubscription(4L);
-        assertThat(userEntity.getSubscription()).isEqualTo(user.getSubscription());
+        UserDtoResponse userEntity = userService.changeSubscription(4L);
+        assertThat(userEntity.getSubscription().getType().getName()).isEqualTo(user.getSubscription().getType().getName());
         verify(userRepository, times(1)).findByUsername(any());
         verify(subscriptionRepository, times(1)).save(any(SubscriptionEntity.class));
         verify(userRepository, times(1)).save(any(UserEntity.class));
@@ -215,16 +217,15 @@ public class UserServiceTest {
 
     @Test
     void deleteOneCompanyFromUser() {
-        List<CompanyEntity> companyEntities = new ArrayList<>();
-        companyEntities.add(company);
-        user.setCompanies(companyEntities);
+        List<CompanyDto> companyDto= new ArrayList<>();
+        companyDto.add(CompanyMapper.INSTANCE.companyToCompanyDto(company));
         doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
         doReturn(Optional.of(company)).when(companyRepository).findBySymbol(any());
-        doReturn(user).when(userRepository).save(any(UserEntity.class));
+        doReturn(companyDto).when(companyUserService).getCompaniesFromUser(anyLong());
         List<CompanyDto> companiesFromUser = userService.deleteOneCompanyFromUser(company.getSymbol());
-        assertThat(companiesFromUser.size()).isZero();
+        assertThat(companiesFromUser.size()).isNotNull();
         verify(userRepository, times(1)).findByUsername(any());
         verify(companyRepository, times(1)).findBySymbol(any());
-        verify(userRepository, times(1)).save(any(UserEntity.class));
+        verify(companyUserService, times(2)).getCompaniesFromUser(anyLong());
     }
 }

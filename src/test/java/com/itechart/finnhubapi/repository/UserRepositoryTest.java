@@ -3,6 +3,7 @@ package com.itechart.finnhubapi.repository;
 import com.itechart.finnhubapi.model.entity.RoleEntity;
 import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
+import com.itechart.finnhubapi.model.entity.SubscriptionTypeEntity;
 import com.itechart.finnhubapi.model.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,10 +34,13 @@ class UserRepositoryTest {
     SubscriptionRepository subscriptionRepository;
     @Autowired
     RoleRepository roleRepository;
+    @Autowired
+    SubscriptionTypeRepository subscriptionTypeRepository;
 
     private final UserEntity user = new UserEntity();
     private final SubscriptionEntity subscription = new SubscriptionEntity();
     private final RoleEntity role = new RoleEntity();
+
 
     @BeforeEach
     void setUp() {
@@ -48,7 +52,9 @@ class UserRepositoryTest {
         user.setStatus("ACTIVE");
         user.setFirstName("TestFirst");
         user.setLastName("TestLast");
-//        subscription.setType(Subscription.LOW.toString());
+        SubscriptionTypeEntity type = subscriptionTypeRepository.findByName(Subscription.LOW.toString()).orElse(null);
+        subscription.setType(type);
+        subscription.setStatus("ACTIVE");
         subscription.setStartTime(LocalDateTime.now());
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         subscriptionRepository.save(subscription);
@@ -88,7 +94,7 @@ class UserRepositoryTest {
 
     @Test
     void findAll() {
-        final int USERS_COUNT_IN_DATABASE = 5;
+        final int USERS_COUNT_IN_DATABASE = 3;
         List<UserEntity> resultList = userRepository.findAll();
         assertThat(resultList).isNotNull();
         assertThat(resultList.size()).isEqualTo(USERS_COUNT_IN_DATABASE);

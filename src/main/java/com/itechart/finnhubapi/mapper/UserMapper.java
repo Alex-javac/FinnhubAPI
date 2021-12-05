@@ -1,12 +1,16 @@
 package com.itechart.finnhubapi.mapper;
 
-import com.itechart.finnhubapi.dto.UserDto;
-import com.itechart.finnhubapi.dto.UserDtoResponse;
-import com.itechart.finnhubapi.dto.UserUpdateDto;
+import com.itechart.finnhubapi.dto.*;
+import com.itechart.finnhubapi.model.entity.RoleEntity;
+import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
+import com.itechart.finnhubapi.model.entity.SubscriptionTypeEntity;
 import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.security.CustomUserDetails;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mapper
 public interface UserMapper {
@@ -16,9 +20,13 @@ public interface UserMapper {
 
     UserEntity userDtoToUserEntity(UserDto userDto);
 
-    UserDtoResponse userToUserDtoResponse(UserEntity user);
+    SubscriptionDto subscriptionToSubscriptionDto(SubscriptionEntity subscription);
 
-    UserEntity userDtoResponseToUserEntity(UserDtoResponse userDtoResponse);
+    SubscriptionTypeDto subscriptionTypeToSubscriptionTypeDto(SubscriptionTypeEntity subscriptionType);
+
+    RoleDto roleEntityToRoleDto(RoleEntity roleEntity);
+
+    UserDtoResponse userToUserDtoResponse(UserEntity user);
 
     UserUpdateDto userToUserUpdateDto(UserEntity user);
 }

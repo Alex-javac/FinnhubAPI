@@ -1,6 +1,5 @@
 package com.itechart.finnhubapi.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,7 +20,6 @@ public class RoleEntity extends BaseEntity {
     @Column(name = "name")
     private String name;
 
-    @JsonBackReference
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
     private List<UserEntity> users;
 }

@@ -4,13 +4,12 @@ import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.UserDto;
 import com.itechart.finnhubapi.dto.UserDtoResponse;
 import com.itechart.finnhubapi.dto.UserUpdateDto;
-import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.model.entity.UserEntity;
 
 import java.util.List;
 
 public interface UserService {
-    UserEntity findById(long id);
+    UserDtoResponse findById(long id);
 
     void deleteById(long id);
 
@@ -18,19 +17,17 @@ public interface UserService {
 
     UserDtoResponse updateUser(UserUpdateDto user);
 
-    List<UserEntity> findAll();
+    List<UserDtoResponse> findAll();
 
-    UserEntity addCompany(String symbol);
+    List<CompanyDto> addCompany(String symbol);
 
-    UserEntity lockOrUnlock(Long id, String status);
-
-    List<CompanyDto> getCompaniesFromUser(String username);
+    UserDtoResponse lockOrUnlock(Long id, String status);
 
     UserEntity findByUsername(String userName);
 
-    UserEntity changeSubscription(Long subscriptionId);
+    UserDtoResponse changeSubscription(Long subscriptionId);
 
-    UserEntity renewSubscription(long month);
+    UserDtoResponse renewSubscription(long month);
 
     List<CompanyDto> deleteOneCompanyFromUser(String symbol);
 

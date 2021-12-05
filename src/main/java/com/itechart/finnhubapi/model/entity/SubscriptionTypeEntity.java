@@ -1,12 +1,15 @@
 package com.itechart.finnhubapi.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.itechart.finnhubapi.model.Subscription;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.List;
 
 @Getter
@@ -21,7 +24,6 @@ public class SubscriptionTypeEntity extends BaseEntity{
     @Column(name = "price")
     private Double price;
 
-    @JsonBackReference
     @OneToMany(mappedBy = "type", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<SubscriptionEntity> subscriptionEntities;
 }

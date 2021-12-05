@@ -1,15 +1,14 @@
 package com.itechart.finnhubapi.service.impl;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
+import com.itechart.finnhubapi.dto.SubscriptionTypeDto;
 import com.itechart.finnhubapi.dto.UserDto;
 import com.itechart.finnhubapi.dto.UserDtoResponse;
 import com.itechart.finnhubapi.dto.UserUpdateDto;
 import com.itechart.finnhubapi.exceptions.CheckValueException;
-import com.itechart.finnhubapi.exceptions.CompanyAlreadyOnListException;
 import com.itechart.finnhubapi.exceptions.CompanyIsNotOnListException;
 import com.itechart.finnhubapi.exceptions.CompanyNotFoundException;
 import com.itechart.finnhubapi.exceptions.EmailOrLoginInDataBaseException;
-import com.itechart.finnhubapi.exceptions.EmptyListCompanyException;
 import com.itechart.finnhubapi.exceptions.IncorrectPasswordOrLoginException;
 import com.itechart.finnhubapi.exceptions.NoDataFoundException;
 import com.itechart.finnhubapi.exceptions.SubscriptionTypeException;
@@ -38,11 +37,11 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -54,16 +53,24 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender emailSender;
     private final SubscriptionTypeRepository typeRepository;
+    private final CompanyUserService companyUserService;
 
-    public UserEntity findById(long id) {
-        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+    @Transactional
+    @Override
+    public UserDtoResponse findById(long id) {
+        UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        return UserMapper.INSTANCE.userToUserDtoResponse(userEntity);
     }
 
+    @Transactional
+    @Override
     public void deleteById(long id) {
         findById(id);
         userRepository.deleteById(id);
     }
 
+    @Transactional
+    @Override
     public UserEntity findByLoginAndPassword(String userName, String password) {
         UserEntity userEntity = findByUsername(userName);
         if (userEntity != null) {
@@ -74,6 +81,8 @@ public class UserServiceImpl implements UserService {
         throw new IncorrectPasswordOrLoginException();
     }
 
+    @Transactional
+    @Override
     public UserDtoResponse saveUser(UserDto user) {
         if (isEmailOrLoginInDataBase(user.getEmail(), user.getUsername())) {
             throw new EmailOrLoginInDataBaseException(user.getEmail(), user.getUsername());
@@ -94,7 +103,6 @@ public class UserServiceImpl implements UserService {
         userEntity.setRoles(userRoles);
         userEntity.setCreated(LocalDateTime.now());
         userEntity.setUpdated(LocalDateTime.now());
-        userEntity.setCompanies(new ArrayList<>());
         userEntity.setPassword(passwordEncoder.encode(user.getPassword()));
         UserDtoResponse savedUser = UserMapper.INSTANCE.userToUserDtoResponse(userRepository.save(userEntity));
         SimpleMailMessage message = new SimpleMailMessage();
@@ -109,6 +117,8 @@ public class UserServiceImpl implements UserService {
         return savedUser;
     }
 
+    @Transactional
+    @Override
     public UserDtoResponse updateUser(UserUpdateDto user) {
         if (isEmailOrLoginInDataBase(user.getEmail(), user.getUsername())) {
             throw new EmailOrLoginInDataBaseException(user.getEmail(), user.getUsername());
@@ -145,41 +155,32 @@ public class UserServiceImpl implements UserService {
         return UserMapper.INSTANCE.userToUserDtoResponse(userRepository.save(userEntity));
     }
 
-    public List<UserEntity> findAll() {
+    @Transactional
+    @Override
+    public List<UserDtoResponse> findAll() {
+        List<UserDtoResponse> userDtoResponseList = new ArrayList<>();
         List<UserEntity> users = userRepository.findAll();
         if (users.isEmpty()) {
             throw new NoDataFoundException();
         }
-        return users;
+        for (UserEntity user : users) {
+            userDtoResponseList.add(UserMapper.INSTANCE.userToUserDtoResponse(user));
+        }
+        return userDtoResponseList;
     }
 
-    public UserEntity addCompany(String symbol) {
+    @Transactional
+    @Override
+    public List<CompanyDto> addCompany(String symbol) {
         UserEntity user = findByUsername(UserUtil.userName());
-        if (UserUtil.isCompany(symbol, user)) {
-            throw new CompanyAlreadyOnListException(symbol);
-        }
-        SubscriptionTypeEntity subscription = user.getSubscription().getType();
-        CompanyEntity company = companyRepository.findBySymbol(symbol).orElseThrow(
-                () -> new CompanyNotFoundException(symbol));
-        List<CompanyEntity> companies = user.getCompanies();
-        if (Subscription.LOW.toString().equals(subscription.getName())) {
-            if (companies.size() >= 2) {
-                companies.remove(0);
-            }
-            companies.add(company);
-        } else if (Subscription.MEDIUM.toString().equals(subscription.getName()) ||
-                Subscription.HIGH.toString().equals(subscription.getName())) {
-            if (companies.size() >= 3) {
-                companies.remove(0);
-            }
-            companies.add(company);
-        }
-        user.setCompanies(companies);
-        return userRepository.save(user);
+        SubscriptionTypeDto subscriptionTypeDto = UserMapper.INSTANCE.subscriptionTypeToSubscriptionTypeDto(user.getSubscription().getType());
+        return companyUserService.addCompanyToUser(symbol, user.getId(), subscriptionTypeDto);
     }
 
-    public UserEntity lockOrUnlock(Long id, String status) {
-        UserEntity user = findById(id);
+    @Transactional
+    @Override
+    public UserDtoResponse lockOrUnlock(Long id, String status) {
+        UserEntity user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
         user.setStatus(status);
         UserEntity userEntity = userRepository.save(user);
         if (status.equals(StatusUser.ACTIVE.toString())) {
@@ -195,26 +196,19 @@ public class UserServiceImpl implements UserService {
             message.setText("you were blocked");
             emailSender.send(message);
         }
-        return userEntity;
+        return UserMapper.INSTANCE.userToUserDtoResponse(userEntity);
     }
 
-    public List<CompanyDto> getCompaniesFromUser(String username) {
-        List<CompanyEntity> companies = findByUsername(username).getCompanies();
-        if (companies.isEmpty()) {
-            throw new EmptyListCompanyException();
-        }
-        return companies
-                .stream()
-                .map(CompanyMapper.INSTANCE::companyToCompanyDto)
-                .collect(Collectors.toList());
-    }
-
+    @Transactional
+    @Override
     public UserEntity findByUsername(String userName) {
         return userRepository.findByUsername(userName).orElseThrow(() ->
                 new UserNotFoundException(userName));
     }
 
-    public UserEntity changeSubscription(Long subscriptionId) {
+    @Transactional
+    @Override
+    public UserDtoResponse changeSubscription(Long subscriptionId) {
         UserEntity user = findByUsername(UserUtil.userName());
         SubscriptionEntity subscriptionEntity = user.getSubscription();
         SubscriptionTypeEntity subscriptionType = typeRepository.findById(subscriptionId).orElseThrow(SubscriptionTypeException::new);
@@ -237,45 +231,47 @@ public class UserServiceImpl implements UserService {
                 user.setRoles(userRoles);
             }
             subscriptionEntity.setType(subscriptionType);
+            subscriptionEntity.setStatus(StatusSubscription.ACTIVE.toString());
             subscriptionEntity.setStartTime(LocalDateTime.now());
             subscriptionEntity.setFinishTime(LocalDateTime.now().plusMonths(3));
             SubscriptionEntity saveSubscription = subscriptionRepository.save(subscriptionEntity);
-            if (subscriptionType.getName().equals(Subscription.LOW.toString()) && user.getCompanies().size() > 2) {
-                List<CompanyEntity> companies = user.getCompanies();
-                companies.remove(companies.size() - 1);
-                user.setCompanies(companies);
+            if (subscriptionType.getName().equals(Subscription.LOW.toString())) {
+                List<CompanyDto> companyList = companyUserService.getCompaniesFromUser(user.getId());
+                if (companyList.size() > 2) {
+                    companyUserService.deleteOneCompanyFromList(user.getId());
+                }
             }
             user.setSubscription(saveSubscription);
         }
-        return userRepository.save(user);
+        return UserMapper.INSTANCE.userToUserDtoResponse(userRepository.save(user));
     }
 
-    public UserEntity renewSubscription(long month) {
+    @Transactional
+    @Override
+    public UserDtoResponse renewSubscription(long month) {
         UserEntity user = findByUsername(UserUtil.userName());
         SubscriptionEntity subscription = user.getSubscription();
         LocalDateTime plusMonths = subscription.getFinishTime().plusMonths(month);
         subscription.setFinishTime(plusMonths);
         SubscriptionEntity renewSubscription = subscriptionRepository.save(subscription);
         user.setSubscription(renewSubscription);
-        return userRepository.save(user);
+        return UserMapper.INSTANCE.userToUserDtoResponse(userRepository.save(user));
     }
 
+    @Transactional
+    @Override
     public List<CompanyDto> deleteOneCompanyFromUser(String symbol) {
         UserEntity user = findByUsername(UserUtil.userName());
-        List<CompanyEntity> companies = user.getCompanies();
-        CompanyEntity company = companyRepository.findBySymbol(symbol).orElseThrow(
+        List<CompanyDto> companies = companyUserService.getCompaniesFromUser(user.getId());
+        CompanyEntity companyEntity = companyRepository.findBySymbol(symbol).orElseThrow(
                 () -> new CompanyNotFoundException(symbol));
+        CompanyDto company = CompanyMapper.INSTANCE.companyToCompanyDto(companyEntity);
         if (companies.contains(company)) {
-            companies.remove(company);
+            companyUserService.deleteOneCompanyFromList(companyEntity.getId(), user.getId());
         } else {
             throw new CompanyIsNotOnListException(symbol);
         }
-        user.setCompanies(companies);
-        UserEntity userEntity = userRepository.save(user);
-        return userEntity.getCompanies()
-                .stream()
-                .map(CompanyMapper.INSTANCE::companyToCompanyDto)
-                .collect(Collectors.toList());
+        return companyUserService.getCompaniesFromUser(user.getId());
     }
 
     private boolean isEmailOrLoginInDataBase(String email, String login) {

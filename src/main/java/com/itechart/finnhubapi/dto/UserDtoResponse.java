@@ -2,9 +2,6 @@ package com.itechart.finnhubapi.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.itechart.finnhubapi.model.entity.CompanyEntity;
-import com.itechart.finnhubapi.model.entity.RoleEntity;
-import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,9 +22,7 @@ public class UserDtoResponse {
     @JsonProperty("email")
     private String email;
     @JsonProperty("subscription")
-    private SubscriptionEntity subscription;
+    private SubscriptionDto subscription;
     @JsonProperty("roles")
-    private List<RoleEntity> roles;
-    @JsonProperty("companies")
-    private List<CompanyEntity> companies;
+    private List<RoleDto> roles;
 }

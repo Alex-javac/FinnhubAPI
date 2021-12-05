@@ -9,11 +9,13 @@ import com.itechart.finnhubapi.feignservice.FinnhubClient;
 import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.model.entity.SubscriptionTypeEntity;
 import com.itechart.finnhubapi.model.entity.UserEntity;
+import com.itechart.finnhubapi.service.impl.CompanyUserService;
 import com.itechart.finnhubapi.util.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -22,13 +24,15 @@ public class StockService {
     private String token;
     private final FinnhubClient finnhubClient;
     private final UserService userService;
+    private final CompanyUserService companyUserService;
 
+    @Transactional
     public FinancialStatementDto getFinancialResponseEntity(String symbol) {
         UserEntity user = userService.findByUsername(UserUtil.userName());
         SubscriptionTypeEntity subscription = user.getSubscription().getType();
         FinancialStatementDto finance;
         if (Subscription.HIGH.toString().equals(subscription.getName())) {
-            if (UserUtil.isCompany(symbol, user)) {
+            if (companyUserService.isCompany(symbol, user.getId())) {
                 finance = finnhubClient.getFinance(symbol, token);
                 return finance;
             } else {
@@ -39,6 +43,7 @@ public class StockService {
         }
     }
 
+    @Transactional
     public MetricDto getMetricResponseEntity(String symbol) {
         UserEntity user = userService.findByUsername(UserUtil.userName());
         SubscriptionTypeEntity subscription = user.getSubscription().getType();
@@ -46,7 +51,7 @@ public class StockService {
         if (Subscription.MEDIUM.toString().equals(subscription.getName()) ||
                 Subscription.HIGH.toString().equals(subscription.getName())
         ) {
-            if (UserUtil.isCompany(symbol, user)) {
+            if (companyUserService.isCompany(symbol, user.getId())) {
                 metric = finnhubClient.getMetric(symbol, token);
                 return metric;
             } else {

@@ -2,6 +2,7 @@ package com.itechart.finnhubapi.service.impl;
 
 import com.itechart.finnhubapi.exceptions.SubscriptionTypeException;
 import com.itechart.finnhubapi.model.Role;
+import com.itechart.finnhubapi.model.StatusSubscription;
 import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.model.entity.RoleEntity;
 import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -32,6 +34,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final RoleRepository roleRepository;
     private final SubscriptionTypeRepository typeRepository;
 
+    @Transactional
+    @Override
     public Map<String, Long> verificationSubscriptions() {
         Map<String, Long> result = new HashMap<>();
         long blocked = 0L;
@@ -51,6 +55,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 SubscriptionEntity subscription = user.getSubscription();
                 SubscriptionTypeEntity subscriptionType = typeRepository.findByName(Subscription.BASIC.toString()).orElseThrow(SubscriptionTypeException::new);
                 subscription.setType(subscriptionType);
+                subscription.setStatus(StatusSubscription.EXPIRED.toString());
                 subscription.setStartTime(null);
                 subscription.setFinishTime(null);
                 user.setSubscription(subscription);

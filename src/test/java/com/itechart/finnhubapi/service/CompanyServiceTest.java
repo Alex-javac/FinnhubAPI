@@ -5,9 +5,7 @@ import com.itechart.finnhubapi.feignservice.QuoteMicroserviceClient;
 import com.itechart.finnhubapi.feignservice.FinnhubClient;
 import com.itechart.finnhubapi.mapper.CompanyMapper;
 import com.itechart.finnhubapi.model.entity.CompanyEntity;
-import com.itechart.finnhubapi.model.entity.QuoteEntity;
 import com.itechart.finnhubapi.repository.CompanyRepository;
-import com.itechart.finnhubapi.repository.QuoteRepository;
 import com.itechart.finnhubapi.service.impl.CompanyServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -18,13 +16,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doNothing;
@@ -40,8 +36,6 @@ class CompanyServiceTest {
     @Mock
     private CompanyRepository companyRepository;
     @Mock
-    private QuoteRepository quoteRepository;
-    @Mock
     private FinnhubClient serviceFeignClient;
     @Mock
     private QuoteMicroserviceClient microserviceFeignClient;
@@ -49,7 +43,6 @@ class CompanyServiceTest {
     private CompanyServiceImpl companyService;
 
     private final CompanyEntity company = new CompanyEntity();
-    private final QuoteEntity quote = new QuoteEntity();
 
     @BeforeEach
     void setUp() {
@@ -61,15 +54,6 @@ class CompanyServiceTest {
         company.setCurrency("USD");
         company.setDescription("JOHN WOOD GROUP PLC");
         company.setDisplaySymbol("WDGJF");
-        quote.setC(3.2);
-        quote.setD(0.2199);
-        quote.setDp(7.3789);
-        quote.setH(3.2);
-        quote.setL(3.2);
-        quote.setO(3.2);
-        quote.setPc(2.9801);
-        quote.setT(1633708145);
-        quote.setDate(LocalDateTime.now());
     }
 
     @Test
@@ -113,8 +97,8 @@ class CompanyServiceTest {
         List<CompanyEntity> companyEntities = new ArrayList<>();
         companyEntities.add(company);
         doReturn(companyEntities).when(companyRepository).findAll();
-        List<CompanyEntity> companyEntityList = companyService.findAll();
-        assertThat(companyEntityList).isEqualTo(companyEntities);
+        List<CompanyDto> companyEntityList = companyService.findAll();
+        assertThat(companyEntityList.get(0).getSymbol()).isEqualTo(companyEntities.get(0).getSymbol());
         verify(companyRepository, times(1)).findAll();
     }
 

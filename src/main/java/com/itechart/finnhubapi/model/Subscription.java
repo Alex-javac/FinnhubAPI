@@ -4,5 +4,5 @@ public enum Subscription {
     BASIC,
     LOW,
     MEDIUM,
-    HIGH;
+    HIGH
 }

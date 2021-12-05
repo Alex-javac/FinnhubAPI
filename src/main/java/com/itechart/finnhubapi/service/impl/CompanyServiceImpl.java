@@ -19,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,18 +33,23 @@ public class CompanyServiceImpl implements CompanyService {
     private final UserService userService;
     private final FinnhubClient serviceFeignClient;
     private final QuoteMicroserviceClient quoteMicroserviceClient;
+    private final CompanyUserService companyUserService;
 
     public CompanyEntity getEntityBySymbol(String symbol) {
         return companyRepository.findBySymbol(symbol).orElseThrow(
                 () -> new CompanyNotFoundException(symbol));
     }
 
+    @Transactional
+    @Override
     public CompanyDto getBySymbol(String symbol) {
         CompanyEntity bySymbol = companyRepository.findBySymbol(symbol).orElseThrow(
                 () -> new CompanyNotFoundException(symbol));
         return CompanyMapper.INSTANCE.companyToCompanyDto(bySymbol);
     }
 
+    @Transactional
+    @Override
     public boolean save(List<CompanyDto> companyDtos) {
         companyDtos.stream().limit(100).forEach(companyDto ->
                 companyRepository.findBySymbol(companyDto.getSymbol())
@@ -55,27 +62,39 @@ public class CompanyServiceImpl implements CompanyService {
         return true;
     }
 
+    @Transactional
+    @Override
     public List<CompanyDto> getAllCompanyFromFeign() {
         return serviceFeignClient.getCompany(token);
     }
 
-    public List<CompanyEntity> findAll() {
+    @Transactional
+    @Override
+    public List<CompanyDto> findAll() {
+        List<CompanyDto> listCompany = new ArrayList<>();
         List<CompanyEntity> companyEntities = companyRepository.findAll();
         if (companyEntities.isEmpty()) {
             throw new NoDataFoundException();
         }
-        return companyEntities;
+        for (CompanyEntity companyEntity : companyEntities) {
+            listCompany.add(CompanyMapper.INSTANCE.companyToCompanyDto(companyEntity));
+        }
+        return listCompany;
     }
 
+    @Transactional
+    @Override
     public List<QuoteDto> getQuote(String symbol) {
         UserEntity user = userService.findByUsername(UserUtil.userName());
-        if (UserUtil.isCompany(symbol, user)) {
+        if (companyUserService.isCompany(symbol, user.getId())) {
             return quoteMicroserviceClient.getQuote(symbol);
         } else {
             throw new CompanyIsNotOnListException(symbol);
         }
     }
 
+    @Transactional
+    @Override
     public boolean deleteCompany(String symbol) {
         CompanyEntity company = getEntityBySymbol(symbol);
         Long id = company.getId();
@@ -84,6 +103,8 @@ public class CompanyServiceImpl implements CompanyService {
         return !companyRepository.existsById(id);
     }
 
+    @Transactional
+    @Override
     public boolean saveQuote() {
         quoteMicroserviceClient.saveQuote();
         return true;

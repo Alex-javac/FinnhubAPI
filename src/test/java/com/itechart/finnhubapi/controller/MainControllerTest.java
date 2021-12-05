@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itechart.finnhubapi.dto.MonthDto;
 import com.itechart.finnhubapi.dto.SubscriptionIdDto;
 import com.itechart.finnhubapi.dto.UserDto;
+import com.itechart.finnhubapi.dto.UserDtoResponse;
 import com.itechart.finnhubapi.dto.UserUpdateDto;
 import com.itechart.finnhubapi.mapper.UserMapper;
 import com.itechart.finnhubapi.model.entity.RoleEntity;
-import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
 import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.service.UserService;
@@ -67,7 +67,6 @@ class MainControllerTest {
         user.setStatus("ACTIVE");
         user.setFirstName("TestFirst");
         user.setLastName("TestLast");
-//        subscription.setName(Subscription.LOW.toString());
         subscription.setStartTime(LocalDateTime.now());
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);
@@ -75,7 +74,6 @@ class MainControllerTest {
         List<RoleEntity> listRole = new ArrayList<>();
         listRole.add(role);
         user.setRoles(listRole);
-        user.setCompanies(new ArrayList<>());
     }
 
     public static String asJsonString(final Object obj) {
@@ -116,7 +114,8 @@ class MainControllerTest {
 
     @Test
     void locking() throws Exception {
-        doReturn(user).when(userService).lockOrUnlock(anyLong(), anyString());
+        UserDtoResponse userdto = UserMapper.INSTANCE.userToUserDtoResponse(user);
+        doReturn(userdto).when(userService).lockOrUnlock(anyLong(), anyString());
         MvcResult result = mvc.perform(post("/api/v1/lockingUser/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
@@ -127,7 +126,8 @@ class MainControllerTest {
 
     @Test
     void unlocking() throws Exception {
-        doReturn(user).when(userService).lockOrUnlock(anyLong(), anyString());
+        UserDtoResponse userdto = UserMapper.INSTANCE.userToUserDtoResponse(user);
+        doReturn(userdto).when(userService).lockOrUnlock(anyLong(), anyString());
         MvcResult result = mvc.perform(post("/api/v1/unlockingUser/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
@@ -151,7 +151,8 @@ class MainControllerTest {
     void changeSubscription() throws Exception {
         SubscriptionIdDto subscriptionNameDto = new SubscriptionIdDto();
         subscriptionNameDto.setId(2L);
-        doReturn(user).when(userService).changeSubscription(anyLong());
+        UserDtoResponse userdto = UserMapper.INSTANCE.userToUserDtoResponse(user);
+        doReturn(userdto).when(userService).changeSubscription(anyLong());
         MvcResult result = mvc.perform(post("/api/v1/changeSubscription")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(subscriptionNameDto)))
@@ -166,7 +167,8 @@ class MainControllerTest {
     void renewSubscription() throws Exception {
         MonthDto month = new MonthDto();
         month.setMonth(3L);
-        doReturn(user).when(userService).renewSubscription(anyLong());
+        UserDtoResponse userdto = UserMapper.INSTANCE.userToUserDtoResponse(user);
+        doReturn(userdto).when(userService).renewSubscription(anyLong());
         MvcResult result = mvc.perform(post("/api/v1/renewSubscription")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(month)))

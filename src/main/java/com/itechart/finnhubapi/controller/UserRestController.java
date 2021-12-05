@@ -6,6 +6,7 @@ import com.itechart.finnhubapi.dto.UserDtoResponse;
 import com.itechart.finnhubapi.mapper.UserMapper;
 import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.service.UserService;
+import com.itechart.finnhubapi.service.impl.CompanyUserService;
 import com.itechart.finnhubapi.util.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,18 +29,19 @@ import java.util.List;
 public class UserRestController {
 
     private final UserService userService;
+    private final CompanyUserService companyUserService;
 
     @GetMapping(value = "/getAllUsers")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<List<UserEntity>> getAllUsers() {
-        List<UserEntity> allUsers = userService.findAll();
+    public ResponseEntity<List<UserDtoResponse>> getAllUsers() {
+        List<UserDtoResponse> allUsers = userService.findAll();
         return new ResponseEntity<>(allUsers, HttpStatus.OK);
     }
 
     @GetMapping(value = "/getOneUser/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserEntity> getOneUser(@PathVariable("id") Long id) {
-        UserEntity userById = userService.findById(id);
+    public ResponseEntity<UserDtoResponse> getOneUser(@PathVariable("id") Long id) {
+        UserDtoResponse userById = userService.findById(id);
         return new ResponseEntity<>(userById, HttpStatus.OK);
     }
 
@@ -52,15 +54,16 @@ public class UserRestController {
 
     @PostMapping(value = "/addCompanyToUser")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<UserDtoResponse> addCompanyToUser(@RequestBody CompanyDtoRequest symbol) {
-        UserDtoResponse userEntity =UserMapper.INSTANCE.userToUserDtoResponse(userService.addCompany(symbol.getSymbol()));
-        return new ResponseEntity<>(userEntity, HttpStatus.OK);
+    public ResponseEntity<List<CompanyDto>> addCompanyToUser(@RequestBody CompanyDtoRequest symbol) {
+        List<CompanyDto> userCompany =userService.addCompany(symbol.getSymbol());
+        return new ResponseEntity<>(userCompany, HttpStatus.OK);
     }
 
     @GetMapping(value = "/getCompanyFromUser")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<List<CompanyDto>> getCompanyFromUser() {
-        List<CompanyDto> companiesFromUser = userService.getCompaniesFromUser(UserUtil.userName());
+        UserEntity user = userService.findByUsername(UserUtil.userName());
+        List<CompanyDto> companiesFromUser = companyUserService.getCompaniesFromUser(user.getId());
         return new ResponseEntity<>(companiesFromUser, HttpStatus.OK);
     }
 

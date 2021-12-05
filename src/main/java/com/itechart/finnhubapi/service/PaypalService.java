@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -45,6 +46,7 @@ private final SubscriptionTypeRepository typeRepository;
     @Value("${paypal.intent}")
     private String intent;
 
+    @Transactional
     public String paymentForSubscription(SubscriptionIdDto subscription) {
         SubscriptionTypeEntity subscriptionType = typeRepository.findById(subscription.getId()).orElseThrow(SubscriptionTypeException::new);
         double price=subscriptionType.getPrice();
@@ -92,6 +94,7 @@ private final SubscriptionTypeRepository typeRepository;
         }
     }
 
+    @Transactional
     public Payment executePayment(String paymentId, String payerId) {
         try {
             Payment payment = new Payment();

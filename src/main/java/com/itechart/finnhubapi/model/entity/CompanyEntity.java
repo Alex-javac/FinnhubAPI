@@ -1,19 +1,12 @@
 package com.itechart.finnhubapi.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.List;
 
 @Getter
 @Setter
@@ -27,7 +20,7 @@ public class CompanyEntity extends BaseEntity {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "displaySymbol")
+    @Column(name = "display_symbol")
     private String displaySymbol;
 
     @Column(name = "figi")
@@ -41,12 +34,4 @@ public class CompanyEntity extends BaseEntity {
 
     @Column(name = "type")
     private String type;
-
-    @JsonBackReference
-    @ManyToMany(mappedBy = "companies", fetch = FetchType.LAZY)
-    private List<UserEntity> users;
-
-    @JsonManagedReference
-    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private List<QuoteEntity> quotes;
 }

@@ -6,8 +6,13 @@ import com.itechart.finnhubapi.dto.metricdto.MetricDto;
 import com.itechart.finnhubapi.exceptions.FinancialException;
 import com.itechart.finnhubapi.exceptions.MetricException;
 import com.itechart.finnhubapi.feignservice.FinnhubClient;
-import com.itechart.finnhubapi.model.entity.*;
 import com.itechart.finnhubapi.model.Subscription;
+import com.itechart.finnhubapi.model.entity.CompanyEntity;
+import com.itechart.finnhubapi.model.entity.RoleEntity;
+import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
+import com.itechart.finnhubapi.model.entity.SubscriptionTypeEntity;
+import com.itechart.finnhubapi.model.entity.UserEntity;
+import com.itechart.finnhubapi.service.impl.CompanyUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -23,6 +28,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
@@ -38,12 +44,14 @@ class StockServiceTest {
     private FinnhubClient serviceFeignClient;
     @Mock
     private UserService userService;
+    @Mock
+    private CompanyUserService companyUserService;
     @InjectMocks
     private StockService stockService;
 
     private final UserEntity user = new UserEntity();
     private final SubscriptionEntity subscription = new SubscriptionEntity();
-    private final SubscriptionTypeEntity subscriptionType =new SubscriptionTypeEntity();
+    private final SubscriptionTypeEntity subscriptionType = new SubscriptionTypeEntity();
     private final RoleEntity role = new RoleEntity();
     private final CompanyEntity company = new CompanyEntity();
     private final FinancialStatementDto finance = new FinancialStatementDto();
@@ -64,17 +72,14 @@ class StockServiceTest {
         List<RoleEntity> listRole = new ArrayList<>();
         listRole.add(role);
         user.setRoles(listRole);
-        company.setSymbol("WDGJF");
+        company.setSymbol("ZETA");
         company.setMic("OOTC");
         company.setType("Common Stock");
         company.setId(2L);
         company.setFigi("BBG000BJL537");
         company.setCurrency("USD");
         company.setDescription("JOHN WOOD GROUP PLC");
-        company.setDisplaySymbol("WDGJF");
-        List<CompanyEntity> companyEntities = new ArrayList<>();
-        companyEntities.add(company);
-        user.setCompanies(companyEntities);
+        company.setDisplaySymbol("ZETA");
         finance.setSymbol("Test");
         MetricDetailsDto metricDetailsDto = new MetricDetailsDto();
         metric.setMetricDetails(metricDetailsDto);
@@ -89,7 +94,7 @@ class StockServiceTest {
         user.setSubscription(subscription);
         doReturn(user).when(userService).findByUsername(null);
         assertThrows(FinancialException.class,
-                () -> stockService.getFinancialResponseEntity("WDGJF"));
+                () -> stockService.getFinancialResponseEntity("ZETA"));
         verify(userService, times(1)).findByUsername(null);
     }
 
@@ -101,8 +106,9 @@ class StockServiceTest {
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);
         doReturn(user).when(userService).findByUsername(null);
+        doReturn(true).when(companyUserService).isCompany(anyString(), anyLong());
         doReturn(finance).when(serviceFeignClient).getFinance(anyString(), eq(null));
-        FinancialStatementDto response = stockService.getFinancialResponseEntity("WDGJF");
+        FinancialStatementDto response = stockService.getFinancialResponseEntity("ZETA");
         assertThat(response).isNotNull();
         verify(userService, times(1)).findByUsername(null);
         verify(serviceFeignClient, times(1)).getFinance(anyString(), eq(null));
@@ -117,7 +123,7 @@ class StockServiceTest {
         user.setSubscription(subscription);
         doReturn(user).when(userService).findByUsername(null);
         assertThrows(MetricException.class,
-                () -> stockService.getMetricResponseEntity("WDGJF"));
+                () -> stockService.getMetricResponseEntity("ZETA"));
         verify(userService, times(1)).findByUsername(null);
     }
 
@@ -129,8 +135,9 @@ class StockServiceTest {
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);
         doReturn(user).when(userService).findByUsername(null);
+        doReturn(true).when(companyUserService).isCompany(anyString(), anyLong());
         doReturn(metric).when(serviceFeignClient).getMetric(anyString(), eq(null));
-        MetricDto response = stockService.getMetricResponseEntity("WDGJF");
+        MetricDto response = stockService.getMetricResponseEntity("ZETA");
         assertThat(response).isNotNull();
         verify(userService, times(1)).findByUsername(null);
         verify(serviceFeignClient, times(1)).getMetric(anyString(), eq(null));

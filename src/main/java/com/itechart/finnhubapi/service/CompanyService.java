@@ -18,7 +18,7 @@ public interface CompanyService {
 
     List<CompanyDto> getAllCompanyFromFeign();
 
-    List<CompanyEntity> findAll();
+    List<CompanyDto> findAll();
 
     boolean saveQuote();
 

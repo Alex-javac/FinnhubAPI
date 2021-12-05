@@ -175,6 +175,9 @@
 
     <changeSet id="1.0.7" author="alexander.alekseyuk">
         <createTable tableName="user_company">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
             <column name="users_id" type="BIGINT">
             </column>
             <column name="company_id" type="BIGINT">
@@ -194,57 +197,6 @@
         <addForeignKeyConstraint baseColumnNames="company_id"
                                  baseTableName="user_company"
                                  constraintName="fk_user_company_company"
-                                 onDelete="CASCADE"
-                                 onUpdate="RESTRICT"
-                                 referencedColumnNames="id"
-                                 referencedTableName="company"/>
-    </changeSet>
-
-    <changeSet id="1.0.9" author="alexander.alekseyuk">
-        <createTable tableName="quote">
-            <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-
-            <column name="c" type="DOUBLE">
-            </column>
-
-            <column name="d" type="DOUBLE">
-            </column>
-
-            <column name="dp" type="DOUBLE">
-            </column>
-
-            <column name="h" type="DOUBLE">
-            </column>
-
-            <column name="l" type="DOUBLE">
-            </column>
-
-            <column name="o" type="DOUBLE">
-            </column>
-
-            <column name="pc" type="DOUBLE">
-            </column>
-
-            <column name="t" type="DOUBLE">
-            </column>
-
-            <column name="date" type="TIMESTAMP" defaultValue="CURRENT_TIMESTAMP()">
-                <constraints nullable="false"/>
-            </column>
-
-            <column name="company_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-
-        </createTable>
-    </changeSet>
-
-    <changeSet id="1.0.10" author="alexander.alekseyuk">
-        <addForeignKeyConstraint baseColumnNames="company_id"
-                                 baseTableName="quote"
-                                 constraintName="fk_quote_company"
                                  onDelete="CASCADE"
                                  onUpdate="RESTRICT"
                                  referencedColumnNames="id"

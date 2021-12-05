@@ -3,7 +3,6 @@ package com.itechart.finnhubapi.controller;
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.CompanyDtoRequest;
 import com.itechart.finnhubapi.dto.QuoteDto;
-import com.itechart.finnhubapi.model.entity.CompanyEntity;
 import com.itechart.finnhubapi.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +23,8 @@ public class CompanyRestController {
 
     @GetMapping(value = "/getAllCompanies")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<List<CompanyEntity>> getAllCompanies() {
-        List<CompanyEntity> data = companyService.findAll();
+    public ResponseEntity<List<CompanyDto>> getAllCompanies() {
+        List<CompanyDto> data = companyService.findAll();
         return new ResponseEntity<>(data, HttpStatus.OK);
     }
 

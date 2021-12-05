@@ -118,15 +118,6 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(JwtAuthenticationException.class)
-    public ResponseEntity<Object> handleJwtAuthenticationException(
-            JwtAuthenticationException ex, WebRequest request) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("message", ex.getMessage());
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(IncorrectPasswordOrLoginException.class)
     public ResponseEntity<Object> handleIncorrectPasswordOrLoginException(
             IncorrectPasswordOrLoginException ex, WebRequest request) {
@@ -148,6 +139,15 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
     @ExceptionHandler(SubscriptionTypeException.class)
     public ResponseEntity<Object> handleSubscriptionTypeException(
             SubscriptionTypeException ex, WebRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CompanyUserException.class)
+    public ResponseEntity<Object> handleCompanyUserException(
+            CompanyUserException ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("message", ex.getMessage());
