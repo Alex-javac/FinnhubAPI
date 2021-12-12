@@ -92,10 +92,10 @@ class StockServiceTest {
         subscription.setStartTime(LocalDateTime.now());
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);
-        doReturn(user).when(userService).findByUsername(null);
+        doReturn(user).when(userService).findUserEntityById(user.getId());
         assertThrows(FinancialException.class,
-                () -> stockService.getFinancialResponseEntity("ZETA"));
-        verify(userService, times(1)).findByUsername(null);
+                () -> stockService.getFinancialResponseEntity("ZETA", user.getId()));
+        verify(userService, times(1)).findUserEntityById(user.getId());
     }
 
     @Test
@@ -105,12 +105,12 @@ class StockServiceTest {
         subscription.setStartTime(LocalDateTime.now());
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);
-        doReturn(user).when(userService).findByUsername(null);
+        doReturn(user).when(userService).findUserEntityById(user.getId());
         doReturn(true).when(companyUserService).isCompany(anyString(), anyLong());
         doReturn(finance).when(serviceFeignClient).getFinance(anyString(), eq(null));
-        FinancialStatementDto response = stockService.getFinancialResponseEntity("ZETA");
+        FinancialStatementDto response = stockService.getFinancialResponseEntity("ZETA", user.getId());
         assertThat(response).isNotNull();
-        verify(userService, times(1)).findByUsername(null);
+        verify(userService, times(1)).findUserEntityById(user.getId());
         verify(serviceFeignClient, times(1)).getFinance(anyString(), eq(null));
     }
 
@@ -121,10 +121,10 @@ class StockServiceTest {
         subscription.setStartTime(LocalDateTime.now());
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);
-        doReturn(user).when(userService).findByUsername(null);
+        doReturn(user).when(userService).findUserEntityById(user.getId());
         assertThrows(MetricException.class,
-                () -> stockService.getMetricResponseEntity("ZETA"));
-        verify(userService, times(1)).findByUsername(null);
+                () -> stockService.getMetricResponseEntity("ZETA", user.getId()));
+        verify(userService, times(1)).findUserEntityById(user.getId());
     }
 
     @Test
@@ -134,12 +134,12 @@ class StockServiceTest {
         subscription.setStartTime(LocalDateTime.now());
         subscription.setFinishTime(LocalDateTime.now().plusYears(3));
         user.setSubscription(subscription);
-        doReturn(user).when(userService).findByUsername(null);
+        doReturn(user).when(userService).findUserEntityById(user.getId());
         doReturn(true).when(companyUserService).isCompany(anyString(), anyLong());
         doReturn(metric).when(serviceFeignClient).getMetric(anyString(), eq(null));
-        MetricDto response = stockService.getMetricResponseEntity("ZETA");
+        MetricDto response = stockService.getMetricResponseEntity("ZETA", user.getId());
         assertThat(response).isNotNull();
-        verify(userService, times(1)).findByUsername(null);
+        verify(userService, times(1)).findUserEntityById(user.getId());
         verify(serviceFeignClient, times(1)).getMetric(anyString(), eq(null));
     }
 }

@@ -42,7 +42,7 @@ class SubscriptionRepositoryTest {
 
     @Test
     void findAll() {
-        final int SUBSCRIPTION_COUNT_IN_DATABASE = 3;
+        final int SUBSCRIPTION_COUNT_IN_DATABASE = 2;
         List<SubscriptionEntity> resultList = subscriptionRepository.findAll();
         assertThat(resultList).isNotNull();
         assertThat(resultList.size()).isEqualTo(SUBSCRIPTION_COUNT_IN_DATABASE);
@@ -50,12 +50,10 @@ class SubscriptionRepositoryTest {
 
     @Test
     void findById() {
-       SubscriptionEntity subscriptionEntity = subscriptionRepository.save(subscription);
+        SubscriptionEntity subscriptionEntity = subscriptionRepository.save(subscription);
         Optional<SubscriptionEntity> optionalSubscription = subscriptionRepository.findById(subscriptionEntity.getId());
         assertTrue(optionalSubscription.isPresent());
-        optionalSubscription.ifPresent(entity -> {
-            assertEquals(subscription.getType().getName(), entity.getType().getName());
-        });
+        optionalSubscription.ifPresent(entity -> assertEquals(subscription.getType().getName(), entity.getType().getName()));
     }
 
     @Test

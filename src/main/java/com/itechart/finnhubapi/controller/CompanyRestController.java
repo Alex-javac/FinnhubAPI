@@ -4,6 +4,7 @@ import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.CompanyDtoRequest;
 import com.itechart.finnhubapi.dto.QuoteDto;
 import com.itechart.finnhubapi.service.CompanyService;
+import com.itechart.finnhubapi.util.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -20,6 +22,7 @@ import java.util.List;
 public class CompanyRestController {
 
     private final CompanyService companyService;
+    private final UserUtil userUtil;
 
     @GetMapping(value = "/getAllCompanies")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
@@ -37,8 +40,9 @@ public class CompanyRestController {
 
     @GetMapping(value = "/getQuote/{symbol}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<List<QuoteDto>> getQuote(@PathVariable("symbol") String symbol) {
-        List<QuoteDto> quoteDto = companyService.getQuote(symbol);
+    public ResponseEntity<List<QuoteDto>> getQuote(@PathVariable("symbol") String symbol, HttpServletRequest request) {
+        Long userID = userUtil.userID(request);
+        List<QuoteDto> quoteDto = companyService.getQuote(symbol, userID);
         return new ResponseEntity<>(quoteDto, HttpStatus.OK);
     }
 
@@ -49,7 +53,6 @@ public class CompanyRestController {
         return (companyService.save(companyFromFeign)) ?
                 new ResponseEntity<>("successful save Companies", HttpStatus.OK) :
                 new ResponseEntity<>("an error occurred during saving", HttpStatus.NOT_MODIFIED);
-
     }
 
     @PostMapping(value = "/saveQuotes")
@@ -63,9 +66,8 @@ public class CompanyRestController {
     @PostMapping(value = "/deleteCompany")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> deleteCompany(@RequestBody CompanyDtoRequest companyDtoRequest) {
-        return (companyService.deleteCompany(companyDtoRequest.getSymbol())) ?
+        return (companyService.deleteCompany(companyDtoRequest.getId()) ?
                 new ResponseEntity<>("successful delete", HttpStatus.OK) :
-                new ResponseEntity<>("there was an error during deletion", HttpStatus.NOT_MODIFIED);
-
+                new ResponseEntity<>("there was an error during deletion", HttpStatus.NOT_MODIFIED));
     }
 }

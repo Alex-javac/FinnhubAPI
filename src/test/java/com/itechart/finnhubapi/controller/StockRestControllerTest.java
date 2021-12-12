@@ -4,6 +4,7 @@ import com.itechart.finnhubapi.dto.financialdto.FinancialStatementDto;
 import com.itechart.finnhubapi.dto.metricdto.MetricDetailsDto;
 import com.itechart.finnhubapi.dto.metricdto.MetricDto;
 import com.itechart.finnhubapi.service.StockService;
+import com.itechart.finnhubapi.util.UserUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,12 +35,15 @@ class StockRestControllerTest {
 
     @Mock
     private StockService stockService;
+    @Mock
+    private UserUtil userUtil;
     @InjectMocks
     private StockRestController stockRestController;
 
     protected MockMvc mvc;
     private final FinancialStatementDto finance = new FinancialStatementDto();
     private final MetricDto metric = new MetricDto();
+
     @BeforeEach
     void setUp() {
         this.mvc = MockMvcBuilders.standaloneSetup(stockRestController).build();
@@ -48,25 +52,29 @@ class StockRestControllerTest {
     @Test
     void financialsWithHighSubscription() throws Exception {
         finance.setSymbol("Test");
-        doReturn(finance).when(stockService).getFinancialResponseEntity(anyString());
+        doReturn(3L).when(userUtil).userID(any());
+        doReturn(finance).when(stockService).getFinancialResponseEntity(anyString(), anyLong());
         MvcResult result = mvc.perform(get("/api/v1/stock/financials/{symbol}", "Test"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isNotNull();
-        verify(stockService, times(1)).getFinancialResponseEntity(anyString());
+        verify(stockService, times(1)).getFinancialResponseEntity(anyString(), anyLong());
+        verify(userUtil,times(1)).userID(any());
     }
 
     @Test
     void metricWithMediumSubscription() throws Exception {
         MetricDetailsDto metricDetailsDto = new MetricDetailsDto();
         metric.setMetricDetails(metricDetailsDto);
-        doReturn(metric).when(stockService).getMetricResponseEntity(anyString());
+        doReturn(3L).when(userUtil).userID(any());
+        doReturn(metric).when(stockService).getMetricResponseEntity(anyString(), anyLong());
         MvcResult result = mvc.perform(get("/api/v1/stock/metric/{symbol}", "Test"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isNotNull();
-        verify(stockService, times(1)).getMetricResponseEntity(anyString());
+        verify(stockService, times(1)).getMetricResponseEntity(anyString(), anyLong());
+        verify(userUtil,times(1)).userID(any());
     }
 }

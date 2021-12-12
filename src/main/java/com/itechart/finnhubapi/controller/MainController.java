@@ -12,6 +12,7 @@ import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.security.JwtProvider;
 import com.itechart.finnhubapi.service.SubscriptionService;
 import com.itechart.finnhubapi.service.UserService;
+import com.itechart.finnhubapi.util.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Map;
 
@@ -34,6 +36,7 @@ public class MainController {
 
     private final UserService userService;
     private final SubscriptionService subscriptionService;
+    private final UserUtil userUtil;
     private final JwtProvider jwtProvider;
 
     @PostMapping(value = "/registration")
@@ -43,7 +46,7 @@ public class MainController {
     }
 
     @PostMapping("/auth")
-    public ResponseEntity<AuthResponse> auth(@RequestBody AuthRequest request) {
+    public ResponseEntity<AuthResponse> auth(@RequestBody @Valid AuthRequest request) {
         UserEntity userEntity = userService.findByLoginAndPassword(request.getLogin(), request.getPassword());
         String token = jwtProvider.generateToken(userEntity);
         return new ResponseEntity<>(new AuthResponse(token), HttpStatus.OK);
@@ -51,8 +54,9 @@ public class MainController {
 
     @PostMapping(value = "/updateUser")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER', 'ROLE_USER_INACTIVE')")
-    public ResponseEntity<UserDtoResponse> updateUser(@RequestBody @Valid UserUpdateDto userDto) {
-        UserDtoResponse updateUser = userService.updateUser(userDto);
+    public ResponseEntity<UserDtoResponse> updateUser(@RequestBody @Valid UserUpdateDto userDto, HttpServletRequest request) {
+        Long userID = userUtil.userID(request);
+        UserDtoResponse updateUser = userService.updateUser(userDto, userID);
         return new ResponseEntity<>(updateUser, HttpStatus.OK);
     }
 
@@ -83,15 +87,17 @@ public class MainController {
 
     @PostMapping(value = "/changeSubscription")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserDtoResponse> changeSubscription(@RequestBody SubscriptionIdDto subscription) {
-        UserDtoResponse user = userService.changeSubscription(subscription.getId());
+    public ResponseEntity<UserDtoResponse> changeSubscription(@RequestBody SubscriptionIdDto subscription, HttpServletRequest request) {
+        Long userID = userUtil.userID(request);
+        UserDtoResponse user = userService.changeSubscription(subscription.getId(), userID);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @PostMapping(value = "/renewSubscription")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserDtoResponse> renewSubscription(@RequestBody MonthDto month) {
-        UserDtoResponse user = userService.renewSubscription(month.getMonth());
+    public ResponseEntity<UserDtoResponse> renewSubscription(@RequestBody MonthDto month, HttpServletRequest request) {
+        Long userID = userUtil.userID(request);
+        UserDtoResponse user = userService.renewSubscription(month.getMonth(), userID);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 

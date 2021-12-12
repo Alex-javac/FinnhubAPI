@@ -43,7 +43,7 @@ public class UserEntity extends BaseEntity {
     @JoinColumn(name = "subscription_id")
     private SubscriptionEntity subscription;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "users_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))

@@ -13,4 +13,6 @@ public class SubscriptionTypeDto{
     private String name;
     @JsonProperty("price")
     private Double price;
+    @JsonProperty("company_count")
+    private Long companyCount;
 }

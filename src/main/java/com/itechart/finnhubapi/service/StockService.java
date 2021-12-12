@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -26,9 +25,8 @@ public class StockService {
     private final UserService userService;
     private final CompanyUserService companyUserService;
 
-    @Transactional
-    public FinancialStatementDto getFinancialResponseEntity(String symbol) {
-        UserEntity user = userService.findByUsername(UserUtil.userName());
+    public FinancialStatementDto getFinancialResponseEntity(String symbol, Long userId) {
+        UserEntity user = userService.findUserEntityById(userId);
         SubscriptionTypeEntity subscription = user.getSubscription().getType();
         FinancialStatementDto finance;
         if (Subscription.HIGH.toString().equals(subscription.getName())) {
@@ -43,9 +41,8 @@ public class StockService {
         }
     }
 
-    @Transactional
-    public MetricDto getMetricResponseEntity(String symbol) {
-        UserEntity user = userService.findByUsername(UserUtil.userName());
+    public MetricDto getMetricResponseEntity(String symbol, Long userId) {
+        UserEntity user = userService.findUserEntityById(userId);
         SubscriptionTypeEntity subscription = user.getSubscription().getType();
         MetricDto metric;
         if (Subscription.MEDIUM.toString().equals(subscription.getName()) ||

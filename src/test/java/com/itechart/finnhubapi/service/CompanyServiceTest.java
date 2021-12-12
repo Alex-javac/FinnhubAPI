@@ -58,10 +58,10 @@ class CompanyServiceTest {
 
     @Test
     void getEntityBySymbol() {
-        doReturn(Optional.of(company)).when(companyRepository).findBySymbol(company.getSymbol());
-        CompanyEntity companyEntity = companyService.getEntityBySymbol(company.getSymbol());
+        doReturn(Optional.of(company)).when(companyRepository).findById(company.getId());
+        CompanyEntity companyEntity = companyService.getEntityById(company.getId());
         assertThat(companyEntity).isEqualTo(company);
-        verify(companyRepository, times(1)).findBySymbol(company.getSymbol());
+        verify(companyRepository, times(1)).findById(company.getId());
     }
 
     @Test
@@ -112,13 +112,13 @@ class CompanyServiceTest {
 
     @Test
     void deleteCompany() {
-        doReturn(Optional.of(company)).when(companyRepository).findBySymbol(company.getSymbol());
+        doReturn(Optional.of(company)).when(companyRepository).findById(anyLong());
         doNothing().when(companyRepository).deleteById(anyLong());
         doNothing().when(microserviceFeignClient).deleteCompany(anyString());
         doReturn(false).when(companyRepository).existsById(anyLong());
-        boolean isDeleteCompany = companyService.deleteCompany(company.getSymbol());
+        boolean isDeleteCompany = companyService.deleteCompany(company.getId());
         assertThat(isDeleteCompany).isTrue();
-        verify(companyRepository, times(1)).findBySymbol(company.getSymbol());
+        verify(companyRepository, times(1)).findById(anyLong());
         verify(companyRepository, times(1)).deleteById(anyLong());
         verify(companyRepository, times(1)).existsById(anyLong());
     }

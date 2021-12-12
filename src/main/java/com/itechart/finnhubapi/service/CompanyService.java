@@ -8,9 +8,9 @@ import java.util.List;
 
 public interface CompanyService {
 
-    List<QuoteDto> getQuote(String symbol);
+    List<QuoteDto> getQuote(String symbol, Long userId);
 
-    CompanyEntity getEntityBySymbol(String symbol);
+    CompanyEntity getEntityById(Long id);
 
     CompanyDto getBySymbol(String symbol);
 
@@ -22,5 +22,5 @@ public interface CompanyService {
 
     boolean saveQuote();
 
-    boolean deleteCompany(String symbol);
+    boolean deleteCompany(Long id);
 }

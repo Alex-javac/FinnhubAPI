@@ -2,6 +2,7 @@ package com.itechart.finnhubapi.mapper;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.CompanyDtoRequest;
+import com.itechart.finnhubapi.dto.CompanySymbolDto;
 import com.itechart.finnhubapi.model.entity.CompanyEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
@@ -15,4 +16,6 @@ public interface CompanyMapper {
     CompanyEntity companyDtoToCompanyEntity(CompanyDto companyDto);
 
     CompanyDtoRequest companyToCompanyDtoRequest(CompanyEntity company);
+
+    CompanySymbolDto companyToCompanySymbolDto(CompanyEntity company);
 }

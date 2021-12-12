@@ -23,6 +23,7 @@ import java.util.List;
 
 import static com.itechart.finnhubapi.controller.MainControllerTest.asJsonString;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.doReturn;
@@ -137,26 +138,26 @@ class CompanyRestControllerTest {
     @Test
     void deleteCompany() throws Exception {
         CompanyDtoRequest companyDtoRequest = CompanyMapper.INSTANCE.companyToCompanyDtoRequest(company);
-        doReturn(true).when(companyService).deleteCompany(anyString());
+        doReturn(true).when(companyService).deleteCompany(anyLong());
         MvcResult result = mvc.perform(post("/api/v1/company/deleteCompany")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(companyDtoRequest)))
                 .andExpect(status().isOk())
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isNotNull();
-        verify(companyService, times(1)).deleteCompany(anyString());
+        verify(companyService, times(1)).deleteCompany(anyLong());
     }
 
     @Test
     void dontDeleteCompany() throws Exception {
         CompanyDtoRequest companyDtoRequest = CompanyMapper.INSTANCE.companyToCompanyDtoRequest(company);
-        doReturn(false).when(companyService).deleteCompany(anyString());
+        doReturn(false).when(companyService).deleteCompany(anyLong());
         MvcResult result = mvc.perform(post("/api/v1/company/deleteCompany")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(companyDtoRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(companyDtoRequest)))
                 .andExpect(status().isNotModified())
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isNotNull();
-        verify(companyService, times(1)).deleteCompany(anyString());
+        verify(companyService, times(1)).deleteCompany(anyLong());
     }
 }

@@ -9,6 +9,7 @@ import com.itechart.finnhubapi.model.entity.RoleEntity;
 import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
 import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.service.UserService;
+import com.itechart.finnhubapi.util.UserUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -28,8 +29,8 @@ import java.util.List;
 
 import static com.itechart.finnhubapi.controller.MainControllerTest.asJsonString;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -46,6 +47,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserRestControllerTest {
     @Mock
     private UserService userService;
+    @Mock
+    private UserUtil userUtil;
     @InjectMocks
     private UserRestController userRestController;
 
@@ -58,6 +61,7 @@ class UserRestControllerTest {
     @BeforeEach
     void setUp() {
         this.mvc = MockMvcBuilders.standaloneSetup(userRestController).build();
+        user.setId(3L);
         user.setEmail("test@gmail.com");
         user.setUsername("testUser");
         user.setPassword("test");
@@ -73,6 +77,7 @@ class UserRestControllerTest {
         List<RoleEntity> listRole = new ArrayList<>();
         listRole.add(role);
         user.setRoles(listRole);
+        company.setId(4L);
         company.setSymbol("WDGJF");
         company.setMic("OOTC");
         company.setType("Common Stock");
@@ -109,48 +114,24 @@ class UserRestControllerTest {
 
     @Test
     void testGetOneUser() throws Exception {
-        doReturn(user).when(userService).findByUsername(null);
+        doReturn(user.getId()).when(userUtil).userID(any());
+        doReturn(UserMapper.INSTANCE.userToUserDtoResponse(user)).when(userService).findById(anyLong());
         MvcResult result = mvc.perform(get("/api/v1/user/getOneUser"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isNotNull();
-        verify(userService, times(1)).findByUsername(null);
+        verify(userUtil, times(1)).userID(any());
+        verify(userService, times(1)).findById(anyLong());
     }
-
-//    @Test
-//    void addCompanyToUser() throws Exception {
-//        CompanyDtoRequest companyDtoRequest = CompanyMapper.INSTANCE.companyToCompanyDtoRequest(CompanyMapper.INSTANCE.companyDtoToCompanyEntity(company));
-//        doReturn(user).when(userService).addCompany(anyString());
-//        MvcResult result = mvc.perform(post("/api/v1/user/addCompanyToUser")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(asJsonString(companyDtoRequest)))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
-//                .andReturn();
-//        assertThat(result.getResponse().getContentAsString()).isNotNull();
-//        verify(userService, times(1)).addCompany(anyString());
-//    }
-
-//    @Test
-//    void getCompanyFromUser() throws Exception {
-//        List<CompanyDto> companyDtos = new ArrayList<>();
-//        companyDtos.add(company);
-//        doReturn(companyDtos).when(userService).getCompaniesFromUser(null);
-//        MvcResult result = mvc.perform(get("/api/v1/user/getCompanyFromUser", 1L))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
-//                .andReturn();
-//        assertThat(result.getResponse().getContentAsString()).isNotNull();
-//        verify(userService, times(1)).getCompaniesFromUser(null);
-//    }
 
     @Test
     void deleteOneCompanyFromUser() throws Exception {
         List<CompanyDto> companyDtos = new ArrayList<>();
         companyDtos.add(company);
         CompanyDtoRequest companyDtoRequest = CompanyMapper.INSTANCE.companyToCompanyDtoRequest(CompanyMapper.INSTANCE.companyDtoToCompanyEntity(company));
-        doReturn(companyDtos).when(userService).deleteOneCompanyFromUser(anyString());
+        doReturn(user.getId()).when(userUtil).userID(any());
+        doReturn(companyDtos).when(userService).deleteOneCompanyFromUser(anyLong(), anyLong());
         MvcResult result = mvc.perform(post("/api/v1/user/deleteOneCompanyFromUser")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(companyDtoRequest)))
@@ -158,6 +139,7 @@ class UserRestControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isNotNull();
-        verify(userService, times(1)).deleteOneCompanyFromUser(anyString());
+        verify(userService, times(1)).deleteOneCompanyFromUser(anyLong(), anyLong());
+        verify(userUtil, times(1)).userID(any());
     }
 }

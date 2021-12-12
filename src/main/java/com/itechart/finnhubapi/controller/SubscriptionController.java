@@ -4,6 +4,7 @@ import com.itechart.finnhubapi.dto.SubscriptionIdDto;
 import com.itechart.finnhubapi.dto.UserDtoResponse;
 import com.itechart.finnhubapi.service.PaypalService;
 import com.itechart.finnhubapi.service.UserService;
+import com.itechart.finnhubapi.util.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,16 +25,19 @@ import javax.servlet.http.HttpServletRequest;
 public class SubscriptionController {
     private final PaypalService paypalService;
     private final UserService userService;
+    private final UserUtil userUtil;
 
     @PostMapping("/payment")
-    public String paymentForSubscription(@RequestBody SubscriptionIdDto subscription) {
-        return paypalService.paymentForSubscription(subscription);
+    public String paymentForSubscription(@RequestBody SubscriptionIdDto subscription, HttpServletRequest request) {
+        Long userID = userUtil.userID(request);
+        return paypalService.paymentForSubscription(subscription,userID);
     }
 
     @GetMapping("/success/{subscription}")
     public ResponseEntity<String> successPayment(@PathVariable("subscription") long subscription, HttpServletRequest request) {
         paypalService.executePayment(request.getParameter("paymentId"), request.getParameter("PayerID"));
-        UserDtoResponse user = userService.changeSubscription(subscription);
+        Long userID = userUtil.userID(request);
+        UserDtoResponse user = userService.changeSubscription(subscription, userID);
         String lastName = user.getLastName();
         String firstName = user.getFirstName();
         Double price = user.getSubscription().getType().getPrice();

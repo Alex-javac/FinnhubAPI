@@ -3,8 +3,6 @@ package com.itechart.finnhubapi.controller;
 import com.itechart.finnhubapi.dto.CompanyDto;
 import com.itechart.finnhubapi.dto.CompanyDtoRequest;
 import com.itechart.finnhubapi.dto.UserDtoResponse;
-import com.itechart.finnhubapi.mapper.UserMapper;
-import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.service.UserService;
 import com.itechart.finnhubapi.service.impl.CompanyUserService;
 import com.itechart.finnhubapi.util.UserUtil;
@@ -21,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -30,6 +29,7 @@ public class UserRestController {
 
     private final UserService userService;
     private final CompanyUserService companyUserService;
+    private final UserUtil userUtil;
 
     @GetMapping(value = "/getAllUsers")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -47,30 +47,41 @@ public class UserRestController {
 
     @GetMapping(value = "/getOneUser")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<UserDtoResponse> getOneUser() {
-        UserDtoResponse userById = UserMapper.INSTANCE.userToUserDtoResponse(userService.findByUsername(UserUtil.userName()));
+    public ResponseEntity<UserDtoResponse> getOneUser(HttpServletRequest request) {
+        Long userID = userUtil.userID(request);
+        UserDtoResponse userById = userService.findById(userID);
         return new ResponseEntity<>(userById, HttpStatus.OK);
     }
 
     @PostMapping(value = "/addCompanyToUser")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<List<CompanyDto>> addCompanyToUser(@RequestBody CompanyDtoRequest symbol) {
-        List<CompanyDto> userCompany =userService.addCompany(symbol.getSymbol());
+    public ResponseEntity<List<CompanyDto>> addCompanyToUser(@RequestBody CompanyDtoRequest symbol, HttpServletRequest request) {
+        Long userID = userUtil.userID(request);
+        List<CompanyDto> userCompany = userService.addCompany(symbol.getId(), userID);
+        return new ResponseEntity<>(userCompany, HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/addListCompaniesToUser")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<List<CompanyDto>> addListCompaniesToUser(@RequestBody List<CompanyDtoRequest> companies, HttpServletRequest request) {
+        Long userID = userUtil.userID(request);
+        List<CompanyDto> userCompany = userService.addListCompaniesToUser(companies, userID);
         return new ResponseEntity<>(userCompany, HttpStatus.OK);
     }
 
     @GetMapping(value = "/getCompanyFromUser")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<List<CompanyDto>> getCompanyFromUser() {
-        UserEntity user = userService.findByUsername(UserUtil.userName());
-        List<CompanyDto> companiesFromUser = companyUserService.getCompaniesFromUser(user.getId());
+    public ResponseEntity<List<CompanyDto>> getCompanyFromUser(HttpServletRequest request) {
+        Long userID = userUtil.userID(request);
+        List<CompanyDto> companiesFromUser = companyUserService.getCompaniesFromUser(userID);
         return new ResponseEntity<>(companiesFromUser, HttpStatus.OK);
     }
 
     @PostMapping(value = "/deleteOneCompanyFromUser")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<List<CompanyDto>> deleteOneCompanyFromUser(@RequestBody CompanyDtoRequest symbol) {
-        List<CompanyDto> companiesFromUser = userService.deleteOneCompanyFromUser(symbol.getSymbol());
+    public ResponseEntity<List<CompanyDto>> deleteOneCompanyFromUser(@RequestBody CompanyDtoRequest symbol, HttpServletRequest request) {
+        Long userID = userUtil.userID(request);
+        List<CompanyDto> companiesFromUser = userService.deleteOneCompanyFromUser(symbol.getId(), userID);
         return new ResponseEntity<>(companiesFromUser, HttpStatus.OK);
     }
 }

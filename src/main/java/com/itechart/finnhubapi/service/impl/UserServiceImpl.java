@@ -1,6 +1,7 @@
 package com.itechart.finnhubapi.service.impl;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
+import com.itechart.finnhubapi.dto.CompanyDtoRequest;
 import com.itechart.finnhubapi.dto.SubscriptionTypeDto;
 import com.itechart.finnhubapi.dto.UserDto;
 import com.itechart.finnhubapi.dto.UserDtoResponse;
@@ -30,14 +31,12 @@ import com.itechart.finnhubapi.repository.SubscriptionRepository;
 import com.itechart.finnhubapi.repository.SubscriptionTypeRepository;
 import com.itechart.finnhubapi.repository.UserRepository;
 import com.itechart.finnhubapi.service.UserService;
-import com.itechart.finnhubapi.util.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -55,25 +54,27 @@ public class UserServiceImpl implements UserService {
     private final SubscriptionTypeRepository typeRepository;
     private final CompanyUserService companyUserService;
 
-    @Transactional
     @Override
     public UserDtoResponse findById(long id) {
         UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
         return UserMapper.INSTANCE.userToUserDtoResponse(userEntity);
     }
 
-    @Transactional
+    @Override
+    public UserEntity findUserEntityById(long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+    }
+
     @Override
     public void deleteById(long id) {
         findById(id);
         userRepository.deleteById(id);
     }
 
-    @Transactional
     @Override
     public UserEntity findByLoginAndPassword(String userName, String password) {
         UserEntity userEntity = findByUsername(userName);
-        if (userEntity != null) {
+        if (userEntity != null && password != null) {
             if (passwordEncoder.matches(password, userEntity.getPassword())) {
                 return userEntity;
             }
@@ -81,10 +82,15 @@ public class UserServiceImpl implements UserService {
         throw new IncorrectPasswordOrLoginException();
     }
 
-    @Transactional
     @Override
     public UserDtoResponse saveUser(UserDto user) {
-        if (isEmailOrLoginInDataBase(user.getEmail(), user.getUsername())) {
+        if (user.getEmail() == null || user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
+            throw new CheckValueException("Email");
+        } else if (user.getUsername() == null || user.getUsername().isEmpty()) {
+            throw new CheckValueException("Login");
+        } else if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            throw new CheckValueException("Password");
+        } else if (isEmailOrLoginInDataBase(user.getEmail(), user.getUsername())) {
             throw new EmailOrLoginInDataBaseException(user.getEmail(), user.getUsername());
         }
         UserEntity userEntity = UserMapper.INSTANCE.userDtoToUserEntity(user);
@@ -117,13 +123,12 @@ public class UserServiceImpl implements UserService {
         return savedUser;
     }
 
-    @Transactional
     @Override
-    public UserDtoResponse updateUser(UserUpdateDto user) {
+    public UserDtoResponse updateUser(UserUpdateDto user, Long userId) {
         if (isEmailOrLoginInDataBase(user.getEmail(), user.getUsername())) {
             throw new EmailOrLoginInDataBaseException(user.getEmail(), user.getUsername());
         }
-        UserEntity userEntity = findByUsername(UserUtil.userName());
+        UserEntity userEntity = findUserEntityById(userId);
         if (user.getFirstName() != null && !user.getFirstName().isEmpty()) {
             userEntity.setFirstName(user.getFirstName());
         }
@@ -155,7 +160,6 @@ public class UserServiceImpl implements UserService {
         return UserMapper.INSTANCE.userToUserDtoResponse(userRepository.save(userEntity));
     }
 
-    @Transactional
     @Override
     public List<UserDtoResponse> findAll() {
         List<UserDtoResponse> userDtoResponseList = new ArrayList<>();
@@ -169,15 +173,20 @@ public class UserServiceImpl implements UserService {
         return userDtoResponseList;
     }
 
-    @Transactional
     @Override
-    public List<CompanyDto> addCompany(String symbol) {
-        UserEntity user = findByUsername(UserUtil.userName());
+    public List<CompanyDto> addCompany(Long companyId, Long userId) {
+        UserEntity user = findUserEntityById(userId);
         SubscriptionTypeDto subscriptionTypeDto = UserMapper.INSTANCE.subscriptionTypeToSubscriptionTypeDto(user.getSubscription().getType());
-        return companyUserService.addCompanyToUser(symbol, user.getId(), subscriptionTypeDto);
+        return companyUserService.addCompanyToUser(companyId, userId, subscriptionTypeDto);
     }
 
-    @Transactional
+    @Override
+    public List<CompanyDto> addListCompaniesToUser(List<CompanyDtoRequest> companies, Long userId) {
+        UserEntity user = findUserEntityById(userId);
+        SubscriptionTypeDto subscriptionTypeDto = UserMapper.INSTANCE.subscriptionTypeToSubscriptionTypeDto(user.getSubscription().getType());
+        return companyUserService.addListCompaniesToUser(companies, userId, subscriptionTypeDto);
+    }
+
     @Override
     public UserDtoResponse lockOrUnlock(Long id, String status) {
         UserEntity user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
@@ -199,17 +208,15 @@ public class UserServiceImpl implements UserService {
         return UserMapper.INSTANCE.userToUserDtoResponse(userEntity);
     }
 
-    @Transactional
     @Override
     public UserEntity findByUsername(String userName) {
         return userRepository.findByUsername(userName).orElseThrow(() ->
                 new UserNotFoundException(userName));
     }
 
-    @Transactional
     @Override
-    public UserDtoResponse changeSubscription(Long subscriptionId) {
-        UserEntity user = findByUsername(UserUtil.userName());
+    public UserDtoResponse changeSubscription(Long subscriptionId, Long userId) {
+        UserEntity user = findUserEntityById(userId);
         SubscriptionEntity subscriptionEntity = user.getSubscription();
         SubscriptionTypeEntity subscriptionType = typeRepository.findById(subscriptionId).orElseThrow(SubscriptionTypeException::new);
         if (subscriptionType.getName().equals(Subscription.BASIC.toString())) {
@@ -246,10 +253,9 @@ public class UserServiceImpl implements UserService {
         return UserMapper.INSTANCE.userToUserDtoResponse(userRepository.save(user));
     }
 
-    @Transactional
     @Override
-    public UserDtoResponse renewSubscription(long month) {
-        UserEntity user = findByUsername(UserUtil.userName());
+    public UserDtoResponse renewSubscription(long month, Long userId) {
+        UserEntity user = findUserEntityById(userId);
         SubscriptionEntity subscription = user.getSubscription();
         LocalDateTime plusMonths = subscription.getFinishTime().plusMonths(month);
         subscription.setFinishTime(plusMonths);
@@ -258,20 +264,18 @@ public class UserServiceImpl implements UserService {
         return UserMapper.INSTANCE.userToUserDtoResponse(userRepository.save(user));
     }
 
-    @Transactional
     @Override
-    public List<CompanyDto> deleteOneCompanyFromUser(String symbol) {
-        UserEntity user = findByUsername(UserUtil.userName());
-        List<CompanyDto> companies = companyUserService.getCompaniesFromUser(user.getId());
-        CompanyEntity companyEntity = companyRepository.findBySymbol(symbol).orElseThrow(
-                () -> new CompanyNotFoundException(symbol));
+    public List<CompanyDto> deleteOneCompanyFromUser(Long companyId, Long userId) {
+        List<CompanyDto> companies = companyUserService.getCompaniesFromUser(userId);
+        CompanyEntity companyEntity = companyRepository.findById(companyId).orElseThrow(
+                () -> new CompanyNotFoundException(companyId));
         CompanyDto company = CompanyMapper.INSTANCE.companyToCompanyDto(companyEntity);
         if (companies.contains(company)) {
-            companyUserService.deleteOneCompanyFromList(companyEntity.getId(), user.getId());
+            companyUserService.deleteOneCompanyFromList(companyId, userId);
         } else {
-            throw new CompanyIsNotOnListException(symbol);
+            throw new CompanyIsNotOnListException(company.getSymbol());
         }
-        return companyUserService.getCompaniesFromUser(user.getId());
+        return companyUserService.getCompaniesFromUser(userId);
     }
 
     private boolean isEmailOrLoginInDataBase(String email, String login) {

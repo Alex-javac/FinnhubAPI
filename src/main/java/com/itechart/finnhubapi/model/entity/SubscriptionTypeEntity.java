@@ -24,6 +24,9 @@ public class SubscriptionTypeEntity extends BaseEntity{
     @Column(name = "price")
     private Double price;
 
+    @Column(name = "company_count")
+    private Long companyCount;
+
     @OneToMany(mappedBy = "type", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<SubscriptionEntity> subscriptionEntities;
 }

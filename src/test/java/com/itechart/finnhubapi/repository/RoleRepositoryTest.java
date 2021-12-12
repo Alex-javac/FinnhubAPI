@@ -51,9 +51,7 @@ class RoleRepositoryTest {
         RoleEntity roleEntity = roleRepository.save(role);
         Optional<RoleEntity> optionalCompany = roleRepository.findById(roleEntity.getId());
         assertTrue(optionalCompany.isPresent());
-        optionalCompany.ifPresent(entity -> {
-            assertEquals(role.getName(), entity.getName());
-        });
+        optionalCompany.ifPresent(entity -> assertEquals(role.getName(), entity.getName()));
     }
 
     @Test

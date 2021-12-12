@@ -1,21 +1,20 @@
 package com.itechart.finnhubapi.service.impl;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
+import com.itechart.finnhubapi.dto.CompanyDtoRequest;
 import com.itechart.finnhubapi.dto.SubscriptionTypeDto;
 import com.itechart.finnhubapi.exceptions.CompanyAlreadyOnListException;
 import com.itechart.finnhubapi.exceptions.CompanyNotFoundException;
 import com.itechart.finnhubapi.exceptions.CompanyUserException;
+import com.itechart.finnhubapi.exceptions.CompanyUserOverflowException;
 import com.itechart.finnhubapi.mapper.CompanyMapper;
-import com.itechart.finnhubapi.model.Subscription;
 import com.itechart.finnhubapi.model.entity.CompanyEntity;
 import com.itechart.finnhubapi.model.entity.CompanyUserEntity;
-import com.itechart.finnhubapi.model.entity.SubscriptionTypeEntity;
 import com.itechart.finnhubapi.repository.CompanyRepository;
 import com.itechart.finnhubapi.repository.CompanyUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,7 @@ public class CompanyUserService {
     private final CompanyUserRepository companyUserRepository;
     private final CompanyRepository companyRepository;
 
-    @Transactional
+
     public List<CompanyDto> getCompaniesFromUser(Long id) {
         List<CompanyDto> listCompany = new ArrayList<>();
         List<CompanyUserEntity> companyUserEntities = getCompanyUserEntities(id);
@@ -39,29 +38,38 @@ public class CompanyUserService {
     }
 
     private List<CompanyUserEntity> getCompanyUserEntities(Long id) {
-        List<CompanyUserEntity> companyUserEntities = companyUserRepository.findByUsersId(id).orElseThrow(CompanyUserException::new);
-        return companyUserEntities;
+        return companyUserRepository.findByUsersId(id).orElseThrow(CompanyUserException::new);
     }
 
-    @Transactional
-    public List<CompanyDto> addCompanyToUser(String symbol, Long userID, SubscriptionTypeDto subscription) {
-        if (isCompany(symbol, userID)) {
+    public List<CompanyDto> addCompanyToUser(Long companyId, Long userId, SubscriptionTypeDto subscription) {
+        String symbol = companyRepository.findById(companyId).orElseThrow(
+                () -> new CompanyNotFoundException(companyId)).getSymbol();
+        if (isCompany(symbol, userId)) {
             throw new CompanyAlreadyOnListException(symbol);
         }
-        List<CompanyDto> companies = getCompaniesFromUser(userID);
-        if (Subscription.LOW.toString().equals(subscription.getName())) {
-            if (companies.size() >= 2) {
-                deleteOneCompanyFromList(userID);
-            }
-            saveCompanyUser(symbol, userID);
-        } else if (Subscription.MEDIUM.toString().equals(subscription.getName()) ||
-                Subscription.HIGH.toString().equals(subscription.getName())) {
-            if (companies.size() >= 3) {
-                deleteOneCompanyFromList(userID);
-            }
-            saveCompanyUser(symbol, userID);
+        List<CompanyDto> companies = getCompaniesFromUser(userId);
+        if (companies.size() >= subscription.getCompanyCount()) {
+            throw new CompanyUserOverflowException();
         }
-        return getCompaniesFromUser(userID);
+        saveCompanyUser(companyId, userId);
+        return getCompaniesFromUser(userId);
+    }
+
+    public List<CompanyDto> addListCompaniesToUser(List<CompanyDtoRequest> companies, Long userId, SubscriptionTypeDto subscription) {
+        int companiesCount = getCompaniesFromUser(userId).size();
+        for (CompanyDtoRequest company : companies) {
+            if (companiesCount >= subscription.getCompanyCount()) {
+                throw new CompanyUserOverflowException();
+            }
+            String symbol = companyRepository.findById(company.getId()).orElseThrow(
+                    () -> new CompanyNotFoundException(company.getId())).getSymbol();
+            if (isCompany(symbol, userId)) {
+                throw new CompanyAlreadyOnListException(symbol);
+            }
+            saveCompanyUser(company.getId(), userId);
+            companiesCount++;
+        }
+        return getCompaniesFromUser(userId);
     }
 
     public void deleteOneCompanyFromList(Long userId) {
@@ -74,11 +82,9 @@ public class CompanyUserService {
         companyUserRepository.deleteById(companyUser.getId());
     }
 
-    private void saveCompanyUser(String symbol, Long userId) {
-        CompanyEntity company = companyRepository.findBySymbol(symbol).orElseThrow(
-                () -> new CompanyNotFoundException(symbol));
+    private void saveCompanyUser(Long companyId, Long userId) {
         CompanyUserEntity companyUserEntity = new CompanyUserEntity();
-        companyUserEntity.setCompanyId(company.getId());
+        companyUserEntity.setCompanyId(companyId);
         companyUserEntity.setUsersId(userId);
         companyUserRepository.save(companyUserEntity);
     }
@@ -89,6 +95,7 @@ public class CompanyUserService {
         for (CompanyDto company : companies) {
             if (company.getSymbol().equals(symbol)) {
                 flag = true;
+                break;
             }
         }
         return flag;

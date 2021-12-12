@@ -43,14 +43,12 @@ class CompanyRepositoryTest {
         CompanyEntity companyEntity = companyRepository.save(company);
         Optional<CompanyEntity> optionalCompany = companyRepository.findBySymbol(companyEntity.getSymbol());
         assertTrue(optionalCompany.isPresent());
-        optionalCompany.ifPresent(entity -> {
-            assertEquals(company.getSymbol(), entity.getSymbol());
-        });
+        optionalCompany.ifPresent(entity -> assertEquals(company.getSymbol(), entity.getSymbol()));
     }
 
     @Test
     void findAll() {
-        final int COMPANIES_COUNT_IN_DATABASE = 100;
+        final int COMPANIES_COUNT_IN_DATABASE = 50;
         List<CompanyEntity> resultList = companyRepository.findAll();
         assertThat(resultList).isNotNull();
         assertThat(resultList.size()).isEqualTo(COMPANIES_COUNT_IN_DATABASE);
@@ -61,9 +59,7 @@ class CompanyRepositoryTest {
         CompanyEntity companyEntity = companyRepository.save(company);
         Optional<CompanyEntity> optionalCompany = companyRepository.findById(companyEntity.getId());
         assertTrue(optionalCompany.isPresent());
-        optionalCompany.ifPresent(entity -> {
-            assertEquals(company.getSymbol(), entity.getSymbol());
-        });
+        optionalCompany.ifPresent(entity -> assertEquals(company.getSymbol(), entity.getSymbol()));
     }
 
     @Test

@@ -26,7 +26,7 @@ public class SubscriptionEntity extends BaseEntity {
     @Column(name = "finish_time")
     private LocalDateTime finishTime;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subscription_type_id")
     private SubscriptionTypeEntity type;
 

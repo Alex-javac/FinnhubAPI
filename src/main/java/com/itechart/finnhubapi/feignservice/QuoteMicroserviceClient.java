@@ -1,6 +1,7 @@
 package com.itechart.finnhubapi.feignservice;
 
 import com.itechart.finnhubapi.dto.CompanyDtoRequest;
+import com.itechart.finnhubapi.dto.CompanySymbolDto;
 import com.itechart.finnhubapi.dto.QuoteDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,5 +23,5 @@ public interface QuoteMicroserviceClient {
     void deleteCompany(@PathVariable String symbol);
 
     @PostMapping("/settings/saveCompany")
-    void saveCompany(@RequestBody CompanyDtoRequest companyDtoRequest);
+    void saveCompany(@RequestBody CompanySymbolDto companySymbolDto);
 }

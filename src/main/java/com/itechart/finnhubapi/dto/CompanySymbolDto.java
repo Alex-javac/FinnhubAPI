@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CompanyDtoRequest {
-    @JsonProperty("id")
-    private Long id;
+public class CompanySymbolDto {
+    @JsonProperty("symbol")
+    private String symbol;
 }

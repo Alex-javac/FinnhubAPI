@@ -11,7 +11,11 @@ import com.itechart.finnhubapi.model.entity.RoleEntity;
 import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
 import com.itechart.finnhubapi.model.entity.SubscriptionTypeEntity;
 import com.itechart.finnhubapi.model.entity.UserEntity;
-import com.itechart.finnhubapi.repository.*;
+import com.itechart.finnhubapi.repository.CompanyRepository;
+import com.itechart.finnhubapi.repository.RoleRepository;
+import com.itechart.finnhubapi.repository.SubscriptionRepository;
+import com.itechart.finnhubapi.repository.SubscriptionTypeRepository;
+import com.itechart.finnhubapi.repository.UserRepository;
 import com.itechart.finnhubapi.service.impl.CompanyUserService;
 import com.itechart.finnhubapi.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -138,13 +142,13 @@ public class UserServiceTest {
     @Test
     void updateUser() {
         doReturn(user).when(userRepository).save(any(UserEntity.class));
-        doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
+        doReturn(Optional.of(user)).when(userRepository).findById(anyLong());
         doReturn(Optional.empty()).when(userRepository).findByEmail(anyString());
         doReturn(Optional.empty()).when(userRepository).findByUsername(anyString());
-        UserDtoResponse userEntity = userService.updateUser(UserMapper.INSTANCE.userToUserUpdateDto(user));
+        UserDtoResponse userEntity = userService.updateUser(UserMapper.INSTANCE.userToUserUpdateDto(user), user.getId());
         assertThat(userEntity.getEmail()).isEqualTo(user.getEmail());
         verify(userRepository, times(1)).save(any(UserEntity.class));
-        verify(userRepository, times(1)).findByUsername(anyString());
+        verify(userRepository, times(1)).findById(anyLong());
         verify(userRepository, times(1)).findByEmail(anyString());
     }
 
@@ -160,14 +164,14 @@ public class UserServiceTest {
 
     @Test
     void addCompany() {
-        List<CompanyDto> companyDtoList =new ArrayList<>();
+        List<CompanyDto> companyDtoList = new ArrayList<>();
         companyDtoList.add(CompanyMapper.INSTANCE.companyToCompanyDto(company));
-        doReturn(Optional.of(user)).when(userRepository).findByUsername(null);
-        doReturn(companyDtoList).when(companyUserService).addCompanyToUser(anyString(),anyLong(),any(SubscriptionTypeDto.class));
-        List<CompanyDto> result = userService.addCompany(company.getSymbol());
+        doReturn(Optional.of(user)).when(userRepository).findById(anyLong());
+        doReturn(companyDtoList).when(companyUserService).addCompanyToUser(anyLong(), anyLong(), any(SubscriptionTypeDto.class));
+        List<CompanyDto> result = userService.addCompany(company.getId(), user.getId());
         assertThat(result).isEqualTo(companyDtoList);
-        verify(userRepository, times(1)).findByUsername(null);
-        verify(companyUserService, times(1)).addCompanyToUser(anyString(),anyLong(),any(SubscriptionTypeDto.class));
+        verify(userRepository, times(1)).findById(anyLong());
+        verify(companyUserService, times(1)).addCompanyToUser(anyLong(), anyLong(), any(SubscriptionTypeDto.class));
     }
 
     @Test
@@ -190,13 +194,13 @@ public class UserServiceTest {
 
     @Test
     void changeSubscription() {
-        doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
+        doReturn(Optional.of(user)).when(userRepository).findById(anyLong());
         doReturn(user.getSubscription()).when(subscriptionRepository).save(any(SubscriptionEntity.class));
         doReturn(Optional.of(user.getSubscription().getType())).when(typeRepository).findById(anyLong());
         doReturn(user).when(userRepository).save(any(UserEntity.class));
-        UserDtoResponse userEntity = userService.changeSubscription(4L);
+        UserDtoResponse userEntity = userService.changeSubscription(4L, 3L);
         assertThat(userEntity.getSubscription().getType().getName()).isEqualTo(user.getSubscription().getType().getName());
-        verify(userRepository, times(1)).findByUsername(any());
+        verify(userRepository, times(1)).findById(anyLong());
         verify(subscriptionRepository, times(1)).save(any(SubscriptionEntity.class));
         verify(userRepository, times(1)).save(any(UserEntity.class));
         verify(typeRepository, times(1)).findById(anyLong());
@@ -204,28 +208,26 @@ public class UserServiceTest {
 
     @Test
     void renewSubscription() {
-        doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
+        doReturn(Optional.of(user)).when(userRepository).findById(anyLong());
         doReturn(user.getSubscription()).when(subscriptionRepository).save(any(SubscriptionEntity.class));
         doReturn(Optional.of(user.getSubscription().getType())).when(typeRepository).findById(anyLong());
         doReturn(user).when(userRepository).save(any(UserEntity.class));
-        UserDtoResponse userEntity = userService.changeSubscription(4L);
+        UserDtoResponse userEntity = userService.changeSubscription(4L, 3L);
         assertThat(userEntity.getSubscription().getType().getName()).isEqualTo(user.getSubscription().getType().getName());
-        verify(userRepository, times(1)).findByUsername(any());
+        verify(userRepository, times(1)).findById(anyLong());
         verify(subscriptionRepository, times(1)).save(any(SubscriptionEntity.class));
         verify(userRepository, times(1)).save(any(UserEntity.class));
     }
 
     @Test
     void deleteOneCompanyFromUser() {
-        List<CompanyDto> companyDto= new ArrayList<>();
+        List<CompanyDto> companyDto = new ArrayList<>();
         companyDto.add(CompanyMapper.INSTANCE.companyToCompanyDto(company));
-        doReturn(Optional.of(user)).when(userRepository).findByUsername(any());
-        doReturn(Optional.of(company)).when(companyRepository).findBySymbol(any());
+        doReturn(Optional.of(company)).when(companyRepository).findById(anyLong());
         doReturn(companyDto).when(companyUserService).getCompaniesFromUser(anyLong());
-        List<CompanyDto> companiesFromUser = userService.deleteOneCompanyFromUser(company.getSymbol());
+        List<CompanyDto> companiesFromUser = userService.deleteOneCompanyFromUser(company.getId(), user.getId());
         assertThat(companiesFromUser.size()).isNotNull();
-        verify(userRepository, times(1)).findByUsername(any());
-        verify(companyRepository, times(1)).findBySymbol(any());
+        verify(companyRepository, times(1)).findById(anyLong());
         verify(companyUserService, times(2)).getCompaniesFromUser(anyLong());
     }
 }

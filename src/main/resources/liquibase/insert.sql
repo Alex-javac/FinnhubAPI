@@ -1,8 +1,8 @@
-insert into subscription_type (id, name, price)
-values (1,'BASIC', 0.0),
-       (2,'LOW',10.0),
-       (3,'MEDIUM',20.0),
-       (4,'HIGH',30.0);
+insert into subscription_type (id, name, price, company_count)
+values (1,'BASIC', 0.0, 0),
+       (2,'LOW',10.0, 2),
+       (3,'MEDIUM',20.0, 3),
+       (4,'HIGH',30.0, 4);
 
 insert into roles (id, name)
 values (5, 'ROLE_USER_INACTIVE'),

@@ -11,6 +11,7 @@ import com.itechart.finnhubapi.model.entity.RoleEntity;
 import com.itechart.finnhubapi.model.entity.SubscriptionEntity;
 import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.service.UserService;
+import com.itechart.finnhubapi.util.UserUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class MainControllerTest {
     @Mock
     private UserService userService;
+    @Mock
+    private UserUtil userUtil;
     @InjectMocks
     private MainController mainController;
 
@@ -59,6 +62,7 @@ class MainControllerTest {
     @BeforeEach
     void setUp() {
         this.mvc = MockMvcBuilders.standaloneSetup(mainController).build();
+        user.setId(3L);
         user.setEmail("test@gmail.com");
         user.setUsername("testUser");
         user.setPassword("test");
@@ -100,7 +104,8 @@ class MainControllerTest {
 
     @Test
     void updateUser() throws Exception {
-        doReturn(UserMapper.INSTANCE.userToUserDtoResponse(user)).when(userService).updateUser(any(UserUpdateDto.class));
+        doReturn(UserMapper.INSTANCE.userToUserDtoResponse(user)).when(userService).updateUser(any(UserUpdateDto.class), anyLong());
+        doReturn(user.getId()).when(userUtil).userID(any());
         UserDto userDto = UserMapper.INSTANCE.userToUserDto(user);
         MvcResult result = mvc.perform(post("/api/v1/updateUser")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -109,7 +114,8 @@ class MainControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isNotNull();
-        verify(userService, times(1)).updateUser(any(UserUpdateDto.class));
+        verify(userService, times(1)).updateUser(any(UserUpdateDto.class), anyLong());
+        verify(userUtil, times(1)).userID(any());
     }
 
     @Test
@@ -152,7 +158,8 @@ class MainControllerTest {
         SubscriptionIdDto subscriptionNameDto = new SubscriptionIdDto();
         subscriptionNameDto.setId(2L);
         UserDtoResponse userdto = UserMapper.INSTANCE.userToUserDtoResponse(user);
-        doReturn(userdto).when(userService).changeSubscription(anyLong());
+        doReturn(user.getId()).when(userUtil).userID(any());
+        doReturn(userdto).when(userService).changeSubscription(anyLong(), anyLong());
         MvcResult result = mvc.perform(post("/api/v1/changeSubscription")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(subscriptionNameDto)))
@@ -160,7 +167,8 @@ class MainControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isNotNull();
-        verify(userService, times(1)).changeSubscription(anyLong());
+        verify(userService, times(1)).changeSubscription(anyLong(), anyLong());
+        verify(userUtil, times(1)).userID(any());
     }
 
     @Test
@@ -168,7 +176,8 @@ class MainControllerTest {
         MonthDto month = new MonthDto();
         month.setMonth(3L);
         UserDtoResponse userdto = UserMapper.INSTANCE.userToUserDtoResponse(user);
-        doReturn(userdto).when(userService).renewSubscription(anyLong());
+        doReturn(user.getId()).when(userUtil).userID(any());
+        doReturn(userdto).when(userService).renewSubscription(anyLong(), anyLong());
         MvcResult result = mvc.perform(post("/api/v1/renewSubscription")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(month)))
@@ -176,6 +185,7 @@ class MainControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isNotNull();
-        verify(userService, times(1)).renewSubscription(anyLong());
+        verify(userService, times(1)).renewSubscription(anyLong(), anyLong());
+        verify(userUtil, times(1)).userID(any());
     }
 }

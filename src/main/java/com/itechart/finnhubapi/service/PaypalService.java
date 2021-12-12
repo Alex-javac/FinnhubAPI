@@ -1,6 +1,7 @@
 package com.itechart.finnhubapi.service;
 
 import com.itechart.finnhubapi.dto.SubscriptionIdDto;
+import com.itechart.finnhubapi.exceptions.CheckValueException;
 import com.itechart.finnhubapi.exceptions.PayPalException;
 import com.itechart.finnhubapi.exceptions.SubscriptionPaidException;
 import com.itechart.finnhubapi.exceptions.SubscriptionTypeException;
@@ -34,7 +35,7 @@ import java.util.List;
 public class PaypalService {
     private final APIContext apiContext;
     private final UserService userService;
-private final SubscriptionTypeRepository typeRepository;
+    private final SubscriptionTypeRepository typeRepository;
     @Value("${paypal.success.url}")
     private String successUrl;
     @Value("${paypal.cancel.url}")
@@ -46,11 +47,14 @@ private final SubscriptionTypeRepository typeRepository;
     @Value("${paypal.intent}")
     private String intent;
 
-    @Transactional
-    public String paymentForSubscription(SubscriptionIdDto subscription) {
+    public String paymentForSubscription(SubscriptionIdDto subscription, Long userId) {
+        int size = typeRepository.findAll().size();
+        if (subscription.getId() == null || subscription.getId() > size || subscription.getId() < 1) {
+            throw new CheckValueException("subscription");
+        }
         SubscriptionTypeEntity subscriptionType = typeRepository.findById(subscription.getId()).orElseThrow(SubscriptionTypeException::new);
-        double price=subscriptionType.getPrice();
-        UserEntity user = userService.findByUsername(UserUtil.userName());
+        double price = subscriptionType.getPrice();
+        UserEntity user = userService.findUserEntityById(userId);
         if (!user.getSubscription().getType().getName().equals(subscriptionType.getName())) {
             Payment payment = createPayment(price, subscription.getId());
             for (Links link : payment.getLinks()) {
@@ -94,7 +98,6 @@ private final SubscriptionTypeRepository typeRepository;
         }
     }
 
-    @Transactional
     public Payment executePayment(String paymentId, String payerId) {
         try {
             Payment payment = new Payment();

@@ -7,6 +7,8 @@ import lombok.Data;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CompanyDto {
+    @JsonProperty("id")
+    private Long id;
     @JsonProperty("currency")
     private String currency;
     @JsonProperty("description")

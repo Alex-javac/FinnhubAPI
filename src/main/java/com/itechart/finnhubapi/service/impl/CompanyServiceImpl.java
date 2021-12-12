@@ -1,7 +1,7 @@
 package com.itechart.finnhubapi.service.impl;
 
 import com.itechart.finnhubapi.dto.CompanyDto;
-import com.itechart.finnhubapi.dto.CompanyDtoRequest;
+import com.itechart.finnhubapi.dto.CompanySymbolDto;
 import com.itechart.finnhubapi.dto.QuoteDto;
 import com.itechart.finnhubapi.exceptions.CompanyIsNotOnListException;
 import com.itechart.finnhubapi.exceptions.CompanyNotFoundException;
@@ -14,12 +14,10 @@ import com.itechart.finnhubapi.model.entity.UserEntity;
 import com.itechart.finnhubapi.repository.CompanyRepository;
 import com.itechart.finnhubapi.service.CompanyService;
 import com.itechart.finnhubapi.service.UserService;
-import com.itechart.finnhubapi.util.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,12 +33,12 @@ public class CompanyServiceImpl implements CompanyService {
     private final QuoteMicroserviceClient quoteMicroserviceClient;
     private final CompanyUserService companyUserService;
 
-    public CompanyEntity getEntityBySymbol(String symbol) {
-        return companyRepository.findBySymbol(symbol).orElseThrow(
-                () -> new CompanyNotFoundException(symbol));
+@Override
+    public CompanyEntity getEntityById(Long id) {
+        return companyRepository.findById(id).orElseThrow(
+                () -> new CompanyNotFoundException(id));
     }
 
-    @Transactional
     @Override
     public CompanyDto getBySymbol(String symbol) {
         CompanyEntity bySymbol = companyRepository.findBySymbol(symbol).orElseThrow(
@@ -48,27 +46,24 @@ public class CompanyServiceImpl implements CompanyService {
         return CompanyMapper.INSTANCE.companyToCompanyDto(bySymbol);
     }
 
-    @Transactional
     @Override
     public boolean save(List<CompanyDto> companyDtos) {
-        companyDtos.stream().limit(100).forEach(companyDto ->
+        companyDtos.stream().limit(50).forEach(companyDto ->
                 companyRepository.findBySymbol(companyDto.getSymbol())
                         .orElseGet(() -> {
                             CompanyEntity companyEntity = CompanyMapper.INSTANCE.companyDtoToCompanyEntity(companyDto);
-                            CompanyDtoRequest companyDtoRequest = CompanyMapper.INSTANCE.companyToCompanyDtoRequest(companyEntity);
-                            quoteMicroserviceClient.saveCompany(companyDtoRequest);
+                            CompanySymbolDto companySymbolDto = CompanyMapper.INSTANCE.companyToCompanySymbolDto(companyEntity);
+                            quoteMicroserviceClient.saveCompany(companySymbolDto);
                             return companyRepository.save(companyEntity);
                         }));
         return true;
     }
 
-    @Transactional
     @Override
     public List<CompanyDto> getAllCompanyFromFeign() {
         return serviceFeignClient.getCompany(token);
     }
 
-    @Transactional
     @Override
     public List<CompanyDto> findAll() {
         List<CompanyDto> listCompany = new ArrayList<>();
@@ -82,10 +77,9 @@ public class CompanyServiceImpl implements CompanyService {
         return listCompany;
     }
 
-    @Transactional
     @Override
-    public List<QuoteDto> getQuote(String symbol) {
-        UserEntity user = userService.findByUsername(UserUtil.userName());
+    public List<QuoteDto> getQuote(String symbol, Long userId) {
+        UserEntity user = userService.findUserEntityById(userId);
         if (companyUserService.isCompany(symbol, user.getId())) {
             return quoteMicroserviceClient.getQuote(symbol);
         } else {
@@ -93,17 +87,15 @@ public class CompanyServiceImpl implements CompanyService {
         }
     }
 
-    @Transactional
     @Override
-    public boolean deleteCompany(String symbol) {
-        CompanyEntity company = getEntityBySymbol(symbol);
-        Long id = company.getId();
+    public boolean deleteCompany(Long id) {
+        CompanyEntity company = getEntityById(id);
+        String symbol = company.getSymbol();
         companyRepository.deleteById(id);
         quoteMicroserviceClient.deleteCompany(symbol);
         return !companyRepository.existsById(id);
     }
 
-    @Transactional
     @Override
     public boolean saveQuote() {
         quoteMicroserviceClient.saveQuote();

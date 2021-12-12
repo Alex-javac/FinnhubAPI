@@ -71,9 +71,7 @@ class UserRepositoryTest {
         UserEntity userEntity = userRepository.save(user);
         Optional<UserEntity> optionalUser = userRepository.findByUsername(userEntity.getUsername());
         assertTrue(optionalUser.isPresent());
-        optionalUser.ifPresent(entity -> {
-            assertEquals(user.getUsername(), entity.getUsername());
-        });
+        optionalUser.ifPresent(entity -> assertEquals(user.getUsername(), entity.getUsername()));
     }
 
     @Test
@@ -81,9 +79,7 @@ class UserRepositoryTest {
         UserEntity userEntity = userRepository.save(user);
         Optional<UserEntity> optionalUser = userRepository.findById(userEntity.getId());
         assertTrue(optionalUser.isPresent());
-        optionalUser.ifPresent(entity -> {
-            assertEquals(user.getUsername(), entity.getUsername());
-        });
+        optionalUser.ifPresent(entity -> assertEquals(user.getUsername(), entity.getUsername()));
     }
 
     @Test
@@ -94,7 +90,7 @@ class UserRepositoryTest {
 
     @Test
     void findAll() {
-        final int USERS_COUNT_IN_DATABASE = 3;
+        final int USERS_COUNT_IN_DATABASE = 2;
         List<UserEntity> resultList = userRepository.findAll();
         assertThat(resultList).isNotNull();
         assertThat(resultList.size()).isEqualTo(USERS_COUNT_IN_DATABASE);
